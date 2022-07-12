@@ -1,0 +1,211 @@
+#
+# Define basic display information
+#
+name     : MS2 - Build Prokaryotic Metabolic Models
+
+tooltip  : |
+    Using ModelSEED2 pipeline, construct draft metabolic models based on input annotated genomes.
+
+screenshots : []
+
+
+#
+# Define the set of other narrative methods that should be suggested to the user.
+#
+suggestions :
+    apps:
+        related :
+            []
+        next :
+            []
+    methods:
+        related :
+            []
+        next :
+            [gapfill_metabolic_model,run_flux_balance_analysis]
+
+
+#
+# Configure the display and description of the parameters
+#
+parameters :
+    genomeset_ref :
+        ui-name : |
+            Genome set
+        short-hint : |
+            Set of genomes for modeling
+
+    genome_ref :
+        ui-name : |
+            Genome
+        short-hint : |
+            A genome with functional annotations with KO terms, GO terms, EC numbers, 
+        placeholder : |
+            Genome for modeling
+
+    ontology_priority :
+        ui-name : |
+            Annotation priority
+        short-hint : |
+            Priority of annotations to be used when building models. If unset, RAST annotations will be used exclusively.
+        placeholder : |
+            Annotation priority
+    
+    suffix :
+        ui-name : |
+            Suffix for output models
+        short-hint : |
+            Suffix placed on the genome names when the completed model is saved. Must have a value.
+    
+    save_core_models :
+        ui-name : |
+            Save core models?
+        short-hint : |
+            Check this box to save core models created during reconstruction process, in addition to genome-scale models.
+
+    gapfill_model :
+        ui-name : |
+            Gapfill models?
+        short-hint : |
+            Run gapfilling on models for a set of specified media conditions to ensure biomass production.
+
+    gapfilling_media :
+        ui-name : |
+            Gapfilling Medias (defaults to complete media)
+        short-hint : |
+            Media specifies the set of chemical compounds the organism can use for its growth. If gapfilling is performed, these medias are used as the growth condition for gapfilling. If no media is specified, complete media is used. The “Complete” media is an abstraction of what’s available in our biochemistry database. Every compound that can be transported into the extracellular compartment–or, in other words, for which a transport reaction is available–is used in the complete media. This list is built in real-time, meaning that whenever you run flux balance analysis (FBA) with complete media, the available transporters are parsed from the media database–and is therefore not stored permanently in any media object in the workspace.
+        placeholder : |
+            Growth conditions for gapfilling
+
+    atp_safe :
+        ui-name : |
+            Apply ATP check?
+        short-hint : |
+            Check this box if ATP correction is to be applied after initial model reconstruction.
+        placeholder : |
+            Check model ATP production
+
+    automated_atp_evaluation :
+        ui-name : |
+            Automated ATP?
+        short-hint : |
+            Check this box to have ModelSEED automatically attempt to determine the ATP production conditions for your genome.
+    
+    atp_media :
+        ui-name : |
+            Media to ensure ATP production
+        short-hint : |
+            Specify specific media conditions in which your model should produce ATP.
+
+    template_type :
+        ui-name : |
+            Template for reconstruction
+        short-hint : |
+            Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.The automatic selection feature will always use the latest version of the templates.
+
+    gs_template_ref :
+        ui-name : |
+            Custom template for reconstruction
+        short-hint : |
+            Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.This input enables users to specify their own custom template for use in model reconstruction.
+
+    core_template_ref :
+        ui-name : |
+            Custom core template for reconstruction
+        short-hint : |
+            Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.This input enables users to specify their own custom core template for use in model reconstruction.
+
+    template_reactions_only :
+        ui-name : |
+            Template reactions only
+        short-hint : |
+            Only include reactions in the model if they are in the genome-scale template used for model reconstruction.
+    
+    merge_all_annotations :
+        ui-name : |
+            Merge all selected annotations
+        short-hint : |
+            Merge all selected annotations mapping all associated reactions to genes even if annotation sources disaggree on function.
+parameter-groups:
+  genomes:
+    ui-name: |
+      Genome selection
+    short-hint: |
+      Select the genomes for which the models will be constructed. You can also specify the order in which different annotation sources will be used.
+  reconstruction_parameters:
+    ui-name: |
+      Output parameters
+    short-hint: |
+      Set the suffix to be used when saving the output model. You can also request to save the core-version of the model.
+  template_parameters:
+    ui-name: |
+      Template selection
+    short-hint: |
+      Select the template to use when building models of all genomes. Auto means ModelSEED2 will decide the correct template based on genome classifiers.
+  annotation_ontology_parameters:
+    ui-name: |
+      Annotation ontology parameters
+    short-hint: |
+      Specify how annotation ontology parameters will be used.
+  gapfilling_parameters:
+    ui-name: |
+      Gapfilling parameters
+    short-hint: |
+      Specify if the model should be gapfilled and what media the gapfilling should be done in.
+  atp_safe_parameters:
+    ui-name: |
+      ATP correction parameters
+    short-hint: |
+      Specify which ATP media the model should grow on, or indicate if the model should decide this for itself. If you specify "auto" and specific media, the model will predict conditions then add the media to those conditions.
+
+icon: modelseed-teal.png
+
+description : |
+
+    <p>The Build Metabolic Model App was implemented in KBase to enable users to build genome-scale metabolic models (GEMs) based on the ModelSEED Pipeline for  genomes they have imported or generated with other tools in the system. This overview of the ModelSEED pipeline [1] details the steps for automated reconstruction of GEMs using the Build Metabolic Model App in KBase.</p>
+
+    <p>To use the Build Metabolic Model App with a genome uploaded into KBase, the genome must first be annotated or re-annotated using the RAST functional ontology (<a href="https://narrative.kbase.us/#catalog/apps/RAST_SDK/annotate_contigset/release">Annotate Microbial Assembly </a>or <a href="https://narrative.kbase.us/#catalog/apps/RAST_SDK/reannotate_microbial_genome/release">Annotate Microbial Genome</a>) before users can build a draft metabolic model for an organism. This is necessary because the SEED functional annotations generated by RAST [2] are linked directly to the biochemical reactions in the <a href="https://github.com/ModelSEED/ModelSEEDDatabase/blob/master/Biochemistry/">ModelSEED biochemistry database</a>, which is used by KBase for metabolic modeling. It is important to note that the RAST annotation services are <strong>not developed to annotate Eukaryotic organisms</strong>. We have implemented different modeling strategies for modeling Plants and Fungi. For plants, users may instead use the <a href="https://narrative.kbase.us/#catalog/apps/kb_orthofinder/annotate_plant_transcripts/release">Annotate Plant Enzymes with OrthoFinder App</a>. For fungi, please refer to the stand alone <a href="https://narrative.kbase.us/#catalog/apps/kb_fungalmodeling/built_fungal_model/release">Build Fungal Model App</a> for details.</p>
+
+    <p>Once a genome has been annotated using the RAST functional ontology, it can be fed into the pipeline for preliminary reconstruction, wherein the RAST annotations are used to generate draft metabolic models. Draft metabolic models are comprised of a reaction network complete with gene-protein-reaction (GPR) associations, predicted Gibbs free energy of reaction values, and the biomass reaction. The biomass reaction includes non-universal cofactors, lipids, and cell wall components. The biomass reaction is organism-specific, based on a biomass reaction template, which uses the SEED subsystems and RAST functional annotations to assign non-universal (e.g., cofactors, cell wall components) biomass components that represent unique biological functions exhibited by a large set of organisms or specific to a small set of organisms.</p>
+
+    <p>In order for an organism-specific biomass component to be added to the biomass reaction, its genome must contain the proper subsystems and annotations specified in the template. The GPR associations represent the mapping between the biochemical reactions and the standardized functional roles assigned to genes during the RAST annotation. This mapping allows the pipeline to differentiate between cases where protein products from multiple genes form a complex to catalyze a reaction, and cases where protein products from multiple genes can independently catalyze the same reaction. The draft model includes all reactions associated with one or more enzymes encoded in the genome that are identified in the annotations. Additionally, spontaneous reactions are added during this step. All templates used for model reconstruction can be found in <a href="https://github.com/ModelSEED/ModelSEEDTemplates">Github</a>.</p>
+
+    <p>With the 2.0.0 release the ATP production was improved in the model reconstruction procedure by constructing core models, testing for proper ATP production from this core, then ensuring that ATP production does not incorrectly explode when expanding the core model to a genome-scale model. We similarly improved our gapfilling approach to ensure that gapfilling does not cause a model to start over-producing ATP. Model reconstruction using the “classic” pipeline without the new ATP production method is still available and can be used by turning ON the advanced parameter “classic mode” (OFF by default).<p>
+    
+    <p>Gapfilling is the process by which the App identifies the minimal set of biochemical reactions to add to a draft metabolic model to enable it to produce biomass in a specified media. This step is optional, but it is recommended and runs by default. A radio box in the advanced options of the Build Metabolic Model App can be unchecked to allow model reconstruction without gapfilling. To gapfill the draft metabolic model or to perform additional gapfilling analysis please see the <a href="https://narrative.kbase.us/#appcatalog/app/fba_tools/gapfill_metabolic_model/release">Gapfill Metabolic Model App</a>.</p>
+
+    <p>The quality of a draft metabolic model depends on the completeness of the annotated genome used for the preliminary reconstruction. Due to the fact that most genomes are not completely annotated, draft metabolic models usually contain gaps preventing the production of some biomass components. In this step, an optimization algorithm identifies the minimal set of reactions that must be added to each model to fill these gaps [3, 4]. The gapfilling algorithm is described in detail in the <a href="https://narrative.kbase.us/#appcatalog/app/fba_tools/gapfill_metabolic_model/release">Gapfill Metabolic Model App page</a>. Reactions to be used by gapfilling are selected from the <a href="https://github.com/ModelSEED/ModelSEEDDatabase/tree/master/Biochemistry">ModelSEED biochemistry database</a>. This curated database contains mass and charge balanced reactions, standardized to aqueous conditions at neutral pH. The ModelSEED reaction database integrates biochemistry contained in KEGG, MetaCyc, EcoCyc, Plant BioCyc, Plant Metabolic Networks, and Gramene. This step is conducted to ensure that every model is capable of simulating cell growth.</p>
+
+    <p>Once model reconstruction is complete, <a href="https://narrative.kbase.us/#appcatalog/app/fba_tools/run_flux_balance_analysis/release">Flux Balance Analysis</a> (FBA) can be applied to assess the capacity of reactions to carry flux and reaction essentiality.<p>
+
+    <p>For additional information about metabolic modeling, visit the <a href="https://kbase.us/metabolic-modeling-faq/">Metabolic Modeling in KBase FAQ</a>.<p>
+
+    <p><strong>Team members who developed & deployed algorithm in KBase:</strong>
+    Chris Henry, Janaka Edirisinghe, Sam Seaver, José P. Faria and Neal Conrad. For questions, please <a href="https://www.kbase.us/support/">contact us</a>.</p>
+
+
+publications :
+    -
+        display-text: |
+            [1] Henry CS, DeJongh M, Best AA, Frybarger PM, Linsay B, Stevens RL. High-throughput generation, optimization and analysis of genome-scale metabolic models. Nat Biotechnol. 2010;28: 977–982. doi:10.1038/nbt.1672
+        link: https://www.ncbi.nlm.nih.gov/pubmed/20802497
+
+    -
+        display-text: |
+            [2] Overbeek R, Olson R, Pusch GD, Olsen GJ, Davis JJ, Disz T, et al. The SEED and the Rapid Annotation of microbial genomes using Subsystems Technology (RAST). Nucleic Acids Res. 2014;42: D206–D214. doi:10.1093/nar/gkt1226
+        link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3965101/
+
+    -
+        display-text: |
+            [3] Latendresse M. Efficiently gap-filling reaction networks. BMC Bioinformatics. 2014;15: 225. doi:10.1186/1471-2105-15-225
+        link: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-15-225
+
+    -
+        display-text: |
+            [4] Dreyfuss JM, Zucker JD, Hood HM, Ocasio LR, Sachs MS, Galagan JE. Reconstruction and Validation of a Genome-Scale Metabolic Model for the Filamentous Fungus Neurospora crassa Using FARM. PLOS Computational Biology. 2013;9: e1003126. doi:10.1371/journal.pcbi.1003126
+        link: https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003126
+
+    -
+        display-text: |
+            [5] Mahadevan R, Schilling CH. The effects of alternate optimal solutions in constraint-based genome-scale metabolic models. Metab Eng. 2003;5: 264–276.
+        link: https://www.ncbi.nlm.nih.gov/pubmed/14642354

@@ -1,0 +1,487 @@
+{
+    "name": "build_metabolic_models",
+    "ver": "0.0.1",
+    "authors": [
+        "chenry"
+    ],
+    "contact": "http://kbase.us/contact-us/",
+    "visible": true,
+    "categories": [
+        "active",
+        "metabolic_modeling"
+    ],
+    "widgets": {
+        "output": null,
+        "input": null
+    },
+    "parameter-groups": [
+        {
+            "id": "genomes",
+            "parameters": [
+                "genome_ref",
+                "ontology_priority"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": true,
+            "with_border": true
+        },
+        {
+            "id": "reconstruction_parameters",
+            "parameters": [
+                "suffix",
+                "save_core_models"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "with_border": true
+        },
+        {
+            "id": "gapfilling_parameters",
+            "parameters": [
+                "gapfill_model",
+                "gapfilling_media"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "with_border": true
+        },
+        {
+            "id": "atp_safe_parameters",
+            "parameters": [
+                "atp_safe",
+                "atp_media"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "with_border": true
+        },
+        {
+            "id": "template_parameters",
+            "parameters": [
+                "template_type",
+                "gs_template_ref",
+                "core_template_ref"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "with_border": true
+        },
+        {
+            "id": "annotation_ontology_parameters",
+            "parameters": [
+                "merge_all_annotations",
+                "template_reactions_only"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "with_border": true
+        }
+    ],
+    "parameters": [
+        {
+            "id": "genomeset_ref",
+            "field_type": "text",
+            "default_values": [
+                ""
+            ],
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseSearch.GenomeSet"
+                ]
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": false
+        },
+        {
+            "id": "genome_ref",
+            "field_type": "text",
+            "default_values": [
+                ""
+            ],
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseGenomes.Genome"
+                ]
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": false
+        },
+        {
+            "id": "ontology_priority",
+            "field_type": "textsubdata",
+            "textsubdata_options": {
+                "allow_custom": false,
+                "show_src_obj": true,
+                "subdata_selection": {
+                    "path_to_subdata": [
+                        "ontology_events"
+                    ],
+                    "parameter_id": "genome_id",
+                    "selection_id": "description",
+                    "subdata_included": [
+                        "ontology_events/[*]/description"
+                    ]
+                },
+                "multiselection": true
+            },
+            "allow_multiple": false,
+            "optional": true,
+            "advanced": true
+        },
+        {
+            "id": "suffix",
+            "field_type": "text",
+            "default_values": [
+                ".mdl"
+            ],
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": false
+        },
+        {
+            "id": "save_core_models",
+            "field_type": "checkbox",
+            "default_values": [
+                "0"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        },
+        {
+            "id": "gapfill_model",
+            "field_type": "checkbox",
+            "default_values": [
+                "1"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": false
+        },
+        {
+            "id": "gapfilling_media",
+            "field_type": "text",
+            "default_values": [
+                ""
+            ],
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseBiochem.Media"
+                ]
+            },
+            "allow_multiple": true,
+            "optional": true,
+            "advanced": false
+        },
+        {
+            "id": "atp_safe",
+            "field_type": "checkbox",
+            "default_values": [
+                "1"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        },
+        {
+            "id": "automated_atp_evaluation",
+            "field_type": "checkbox",
+            "default_values": [
+                "1"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        },
+        {
+            "id": "atp_media",
+            "field_type": "dropdown",
+            "default_values": [
+                ""
+            ],
+            "dropdown_options": {
+                "options": [
+                    {
+                        "id": "Glc.O2",
+                        "display": "Aerobic glucose",
+                        "ui_name": "Aerobic glucose",
+                        "value": "Glc.O2"
+                    },
+                    {
+                        "value": "Pyr.O2",
+                        "ui_name": "Aerobic pyruvate",
+                        "display": "Aerobic pyruvate",
+                        "id": "Pyr.O2"
+                    },
+                    {
+                        "id": "Glc",
+                        "value": "Glc",
+                        "ui_name": "Anaerobic glucose",
+                        "display": "Anaerobic glucose"
+                    },
+                    {
+                        "id": "Pyr",
+                        "value": "Pyr",
+                        "ui_name": "Anaerobic pyruvate",
+                        "display": "Anaerobic pyruvate"
+                    },
+                    {
+                        "id": "For.NO3",
+                        "value": "For.NO3",
+                        "ui_name": "Nitrate",
+                        "display": "Nitrate"
+                    },
+                    {
+                        "id": "For.NO2",
+                        "value": "For.NO2",
+                        "ui_name": "Nitrite",
+                        "display": "Nitrite"
+                    },
+                    {
+                        "display": "Methanogenesis",
+                        "ui_name": "Methanogenesis",
+                        "value": "H2.CO2",
+                        "id": "H2.CO2"
+                    }
+                ]
+            },
+            "allow_multiple": true,
+            "optional": true,
+            "advanced": true
+        },
+        {
+            "id": "template_type",
+            "field_type": "dropdown",
+            "default_values": [
+                "auto"
+            ],
+            "dropdown_options": {
+                "options": [
+                    {
+                        "id": "auto",
+                        "value": "auto",
+                        "display": "Automatic selection",
+                        "ui_name": "Automatic selection"
+                    },
+                    {
+                        "id": "old_gramneg",
+                        "value": "old_gramneg",
+                        "display": "Legacy gram negative",
+                        "ui_name": "Legacy gram negative"
+                    },
+                    {
+                        "id": "old_grampos",
+                        "value": "old_grampos",
+                        "display": "Legacy gram positive",
+                        "ui_name": "Legacy gram positive"
+                    },
+                    {
+                        "id": "gramneg",
+                        "value": "gramneg",
+                        "display": "Gram negative",
+                        "ui_name": "Gram negative"
+                    },
+                    {
+                        "id": "grampos",
+                        "value": "grampos",
+                        "display": "Gram positive",
+                        "ui_name": "Gram positive"
+                    },
+                    {
+                        "id": "archaea",
+                        "value": "archaea",
+                        "display": "Archaea",
+                        "ui_name": "Archaea"
+                    },
+                    {
+                        "id": "core",
+                        "value": "core",
+                        "display": "Core metabolism",
+                        "ui_name": "Core metabolism"
+                    },
+                    {
+                        "id": "custom",
+                        "value": "custom",
+                        "display": "Custom (select template)",
+                        "ui_name": "Custom (select template)"
+                    }
+                ]
+            },
+            "allow_multiple": false,
+            "optional": true,
+            "advanced": false
+        },
+        {
+            "id": "gs_template_ref",
+            "field_type": "text",
+            "default_values": [
+                ""
+            ],
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseFBA.NewModelTemplate"
+                ]
+            },
+            "allow_multiple": false,
+            "optional": true,
+            "advanced": true
+        },
+        {
+            "id": "core_template_ref",
+            "field_type": "text",
+            "default_values": [
+                ""
+            ],
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseFBA.NewModelTemplate"
+                ]
+            },
+            "allow_multiple": false,
+            "optional": true,
+            "advanced": true
+        },
+        {
+            "id": "template_reactions_only",
+            "field_type": "checkbox",
+            "default_values": [
+                "1"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        },
+        {
+            "id": "merge_all_annotations",
+            "field_type": "checkbox",
+            "default_values": [
+                "1"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        }
+    ],
+    "behavior": {
+        "service-mapping": {
+            "url": "",
+            "name": "ModelSEEDReconstruction",
+            "method": "build_metabolic_models",
+            "input_mapping": [
+                {
+                    "target_property": "workspace",
+                    "narrative_system_variable": "workspace"
+                },
+                {
+                    "target_property": "genome_ref",
+                    "input_parameter": "genome_ref",
+                    "target_type_transform": "resolved-ref"
+                },
+                {
+                    "input_parameter": "ontology_priority",
+                    "target_property": "ontology_priority"
+                },
+                {
+                    "input_parameter": "suffix",
+                    "target_property": "suffix"
+                },
+                {
+                    "target_property": "save_core_models",
+                    "input_parameter": "save_core_models"
+                },
+                {
+                    "target_property": "gapfill_model",
+                    "input_parameter": "gapfill_model"
+                },
+                {
+                    "target_property": "gapfilling_media",
+                    "input_parameter": "gapfilling_media",
+                    "target_type_transform": "resolved-ref"
+                },
+                {
+                    "target_property": "atp_safe",
+                    "input_parameter": "atp_safe"
+                },
+                {
+                    "target_property": "atp_media",
+                    "input_parameter": "atp_media"
+                },
+                {
+                    "target_property": "template_type",
+                    "input_parameter": "template_type"
+                },
+                {
+                    "target_property": "gs_template_ref",
+                    "input_parameter": "gs_template_ref",
+                    "target_type_transform": "resolved-ref"
+                },
+                {
+                    "target_property": "core_template_ref",
+                    "input_parameter": "core_template_ref",
+                    "target_type_transform": "resolved-ref"
+                },
+                {
+                    "target_property": "template_reactions_only",
+                    "input_parameter": "template_reactions_only"
+                },
+                {
+                    "target_property": "merge_all_annotations",
+                    "input_parameter": "merge_all_annotations"
+                }
+            ],
+            "output_mapping": [
+                {
+                    "service_method_output_path": [
+                        0,
+                        "report_name"
+                    ],
+                    "target_property": "report_name"
+                },
+                {
+                    "service_method_output_path": [
+                        0,
+                        "report_ref"
+                    ],
+                    "target_property": "report_ref"
+                },
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspace"
+                }
+            ]
+        }
+    },
+    "job_id_output_field": "docker"
+}
