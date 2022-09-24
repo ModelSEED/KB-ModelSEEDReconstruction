@@ -29,28 +29,14 @@ suggestions :
 # Configure the display and description of the parameters
 #
 parameters :
-    genomeset_ref :
-        ui-name : |
-            Genome set
-        short-hint : |
-            Set of genomes for modeling
-
     genome_ref :
         ui-name : |
-            Genome
+            Genome or Genome Set
         short-hint : |
-            A genome with functional annotations with KO terms, GO terms, EC numbers, 
+            A genome or genome set with RAST annotations 
         placeholder : |
-            Genome for modeling
+            Genomes for modeling
 
-    ontology_priority :
-        ui-name : |
-            Annotation priority
-        short-hint : |
-            Priority of annotations to be used when building models. If unset, RAST annotations will be used exclusively.
-        placeholder : |
-            Annotation priority
-    
     suffix :
         ui-name : |
             Suffix for output models
@@ -91,7 +77,7 @@ parameters :
         short-hint : |
             Check this box to have ModelSEED automatically attempt to determine the ATP production conditions for your genome.
     
-    atp_media :
+    forced_atp_media :
         ui-name : |
             Media to ensure ATP production
         short-hint : |
@@ -115,17 +101,6 @@ parameters :
         short-hint : |
             Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.This input enables users to specify their own custom core template for use in model reconstruction.
 
-    template_reactions_only :
-        ui-name : |
-            Template reactions only
-        short-hint : |
-            Only include reactions in the model if they are in the genome-scale template used for model reconstruction.
-    
-    merge_all_annotations :
-        ui-name : |
-            Merge all selected annotations
-        short-hint : |
-            Merge all selected annotations mapping all associated reactions to genes even if annotation sources disaggree on function.
 parameter-groups:
   genomes:
     ui-name: |
@@ -142,11 +117,6 @@ parameter-groups:
       Template selection
     short-hint: |
       Select the template to use when building models of all genomes. Auto means ModelSEED2 will decide the correct template based on genome classifiers.
-  annotation_ontology_parameters:
-    ui-name: |
-      Annotation ontology parameters
-    short-hint: |
-      Specify how annotation ontology parameters will be used.
   gapfilling_parameters:
     ui-name: |
       Gapfilling parameters

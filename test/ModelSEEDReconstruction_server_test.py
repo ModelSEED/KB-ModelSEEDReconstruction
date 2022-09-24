@@ -54,14 +54,41 @@ class ModelSEEDReconstructionTest(unittest.TestCase):
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
+        #All input data is stored in the following public narrative in appdev:
+        #https://appdev.kbase.us/narrative/68303
+        #Set output WS - initialy set to fixed chenry workspace so we can view the output in narrative:
+        #https://appdev.kbase.us/narrative/68304
+        #If you are not chenry, either uncomment the following line, OR ask chenry for write permission to 68304
+        #output_ws = self.wsName()
+        output_ws = 68304
+        ret = self.serviceImpl.build_metabolic_models(self.ctx,{
+            "workspace":output_ws,
+            "genome_refs":["68303/Escherichia_coli_K-12_MG1655.RAST"],
+            "run_gapfilling":False,
+            "atp_safe":True,
+            "forced_atp_list":[],
+            "gapfilling_media_list":["KBaseMedia/Carbon-D-Glucose"],
+            "suffix":".mdl",
+            "core_template":"auto",
+            "gs_template":"auto",
+            "gs_template_ref":None,
+            "template_reactions_only":True,
+            "output_core_models":True
+        })
+        
+        ret = self.serviceImpl.build_metabolic_models(self.ctx,{
+            "workspace":output_ws,
+            "genome_refs":["68303/Escherichia_coli_K-12_MG1655.RAST"],
+            "run_gapfilling":True,
+            "atp_safe":True,
+            "forced_atp_list":[],
+            "gapfilling_media_list":["KBaseMedia/Carbon-D-Glucose"],
+            "suffix":".mdl2",
+            "core_template":"auto",
+            "gs_template":"auto",
+            "gs_template_ref":None,
+            "template_reactions_only":True,
+            "output_core_models":True
+        })
         # Check returned data with
         # self.assertEqual(ret[...], ...) or other unittest methods
-        ret = self.serviceImpl.run_ModelSEEDReconstruction(self.ctx, {'workspace_name': self.wsName,
-                                                             'parameter_1': 'Hello World!'})
