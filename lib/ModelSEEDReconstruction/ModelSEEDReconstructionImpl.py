@@ -108,7 +108,8 @@ class ModelSEEDReconstruction:
     """
         report_name = str(uuid.uuid4())
         if not isinstance(workspace, str):
-            workspace = str(workspace)
+            info = self.kbase_api.ws_client.get_workspace_info({"id":workspace})
+            workspace = info[1]
         html_report_folder = os.path.join(self.shared_folder, 'htmlreport')
         os.makedirs(html_report_folder, exist_ok=True)
         with open(os.path.join(html_report_folder, 'index.html'), 'w') as f:
@@ -180,8 +181,10 @@ class ModelSEEDReconstruction:
             "core_template":"auto",
             "gs_template":"auto",
             "gs_template_ref":None,
+            "core_template_ref":None,
             "template_reactions_only":True,
-            "output_core_models":False
+            "output_core_models":False,
+            "automated_atp_evaluation":True
         })
         #Preloading core and preselected template
         templates = {

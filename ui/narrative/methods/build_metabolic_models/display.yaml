@@ -29,7 +29,7 @@ suggestions :
 # Configure the display and description of the parameters
 #
 parameters :
-    genome_ref :
+    genome_refs :
         ui-name : |
             Genome or Genome Set
         short-hint : |
@@ -43,19 +43,19 @@ parameters :
         short-hint : |
             Suffix placed on the genome names when the completed model is saved. Must have a value.
     
-    save_core_models :
+    output_core_models :
         ui-name : |
             Save core models?
         short-hint : |
             Check this box to save core models created during reconstruction process, in addition to genome-scale models.
 
-    gapfill_model :
+    run_gapfilling :
         ui-name : |
             Gapfill models?
         short-hint : |
             Run gapfilling on models for a set of specified media conditions to ensure biomass production.
 
-    gapfilling_media :
+    gapfilling_media_list :
         ui-name : |
             Gapfilling Medias (defaults to complete media)
         short-hint : |
@@ -77,13 +77,13 @@ parameters :
         short-hint : |
             Check this box to have ModelSEED automatically attempt to determine the ATP production conditions for your genome.
     
-    forced_atp_media :
+    forced_atp_list :
         ui-name : |
             Media to ensure ATP production
         short-hint : |
             Specify specific media conditions in which your model should produce ATP.
 
-    template_type :
+    gs_template :
         ui-name : |
             Template for reconstruction
         short-hint : |

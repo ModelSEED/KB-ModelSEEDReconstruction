@@ -18,7 +18,7 @@
         {
             "id": "genomes",
             "parameters": [
-                "genome_ref"
+                "genome_refs"
             ],
             "optional": false,
             "advanced": false,
@@ -29,7 +29,7 @@
             "id": "reconstruction_parameters",
             "parameters": [
                 "suffix",
-                "save_core_models"
+                "output_core_models"
             ],
             "optional": false,
             "advanced": false,
@@ -39,8 +39,8 @@
         {
             "id": "gapfilling_parameters",
             "parameters": [
-                "gapfill_model",
-                "gapfilling_media"
+                "run_gapfilling",
+                "gapfilling_media_list"
             ],
             "optional": false,
             "advanced": false,
@@ -51,7 +51,7 @@
             "id": "atp_safe_parameters",
             "parameters": [
                 "atp_safe",
-                "forced_atp_media",
+                "forced_atp_list",
 				"automated_atp_evaluation"
             ],
             "optional": false,
@@ -62,7 +62,7 @@
         {
             "id": "template_parameters",
             "parameters": [
-                "template_type",
+                "gs_template",
                 "gs_template_ref",
                 "core_template_ref"
             ],
@@ -74,7 +74,7 @@
     ],
     "parameters": [
         {
-            "id": "genome_ref",
+            "id": "genome_refs",
             "field_type": "text",
             "default_values": [
                 ""
@@ -99,7 +99,7 @@
             "advanced": false
         },
         {
-            "id": "save_core_models",
+            "id": "output_core_models",
             "field_type": "checkbox",
             "default_values": [
                 "0"
@@ -113,7 +113,7 @@
             "advanced": true
         },
         {
-            "id": "gapfill_model",
+            "id": "run_gapfilling",
             "field_type": "checkbox",
             "default_values": [
                 "1"
@@ -127,7 +127,7 @@
             "advanced": false
         },
         {
-            "id": "gapfilling_media",
+            "id": "gapfilling_media_list",
             "field_type": "text",
             "default_values": [
                 ""
@@ -170,7 +170,7 @@
             "advanced": true
         },
         {
-            "id": "forced_atp_media",
+            "id": "forced_atp_list",
             "field_type": "dropdown",
             "default_values": [
                 ""
@@ -226,7 +226,7 @@
             "advanced": true
         },
         {
-            "id": "template_type",
+            "id": "gs_template",
             "field_type": "dropdown",
             "default_values": [
                 "auto"
@@ -329,8 +329,8 @@
                     "narrative_system_variable": "workspace"
                 },
                 {
-                    "target_property": "genome_ref",
-                    "input_parameter": "genome_ref",
+                    "target_property": "genome_refs",
+                    "input_parameter": "genome_refs",
                     "target_type_transform": "resolved-ref"
                 },
                 {
@@ -338,16 +338,16 @@
                     "target_property": "suffix"
                 },
                 {
-                    "target_property": "save_core_models",
-                    "input_parameter": "save_core_models"
+                    "target_property": "output_core_models",
+                    "input_parameter": "output_core_models"
                 },
                 {
-                    "target_property": "gapfill_model",
-                    "input_parameter": "gapfill_model"
+                    "target_property": "run_gapfilling",
+                    "input_parameter": "run_gapfilling"
                 },
                 {
-                    "target_property": "gapfilling_media",
-                    "input_parameter": "gapfilling_media",
+                    "target_property": "gapfilling_media_list",
+                    "input_parameter": "gapfilling_media_list",
                     "target_type_transform": "resolved-ref"
                 },
                 {
@@ -355,16 +355,16 @@
                     "input_parameter": "atp_safe"
                 },
                 {
-                    "target_property": "forced_atp_media",
-                    "input_parameter": "forced_atp_media"
+                    "target_property": "forced_atp_list",
+                    "input_parameter": "forced_atp_list"
                 },
 				{
                     "target_property": "automated_atp_evaluation",
                     "input_parameter": "automated_atp_evaluation"
                 },
                 {
-                    "target_property": "template_type",
-                    "input_parameter": "template_type"
+                    "target_property": "gs_template",
+                    "input_parameter": "gs_template"
                 },
                 {
                     "target_property": "gs_template_ref",
