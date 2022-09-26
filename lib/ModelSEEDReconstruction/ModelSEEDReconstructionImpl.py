@@ -9,18 +9,18 @@ import cobra
 import re
 import uuid
 from os.path import exists
-sys.path.append("/deps/ModelSEEDpy/")
 import cobrakbase
 from optlang.symbolics import Zero, add
 from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection
 from cobrakbase.core.kbasefba.newmodeltemplate_builder import NewModelTemplateBuilder
 from cobrakbase.core.kbasefba.fbamodel_from_cobra import CobraModelConverter
-from modelseedpy.helpers import get_classifier
-from modelseedpy.helpers import get_template, get_classifier
+from modelseedpy.helpers import get_template
+from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from ModelSEEDReconstruction.sdkhelper import SDKHelper
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.DataFileUtilClient import DataFileUtil
+import pickle
 import pandas as pd
 
 def fix_genomescale_template(gs_template,core_template):
@@ -116,7 +116,7 @@ class ModelSEEDReconstruction:
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
         self.dfu = DataFileUtil(self.callback_url)
-        self.kbase_api = cobrakbase.KBaseAPI(token=self.token)
+        self.kbase_api = cobrakbase.KBaseAPI(token=self.token,config=self.config)
         #END_CONSTRUCTOR
         pass
 
@@ -156,7 +156,13 @@ class ModelSEEDReconstruction:
         if params["gs_template"] == "custom":
             templates["custom"] = self.kbase_api.get_from_ws(params["gs_template_ref"],None)
         #Initializing classifier
-        genome_classifier = get_classifier('knn_ACNP_RAST_filter')
+        cls_pickle = "/kb/module/data/knn_ACNP_RAST_filter.pickle"
+        cls_features = "/kb/module/data/knn_ACNP_RAST_filter_features.json"
+        with open(cls_pickle, 'rb') as fh:
+            model_filter = pickle.load(fh)
+        with open(cls_features, 'r') as fh:
+            features = json.load(fh)
+        genome_classifier = MSGenomeClassifier(model_filter, features)
         #Initializing output data tables
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
@@ -177,7 +183,6 @@ class ModelSEEDReconstruction:
             #Retrieving genome annotations
             template_type = params["gs_template"]
             if template_type == "auto":
-                genome_classifier = get_classifier('knn_ACNP_RAST_filter')
                 current_output["Class"] = genome_classifier.classify(genome)
                 if current_output["Class"] == "P":
                     template_type = "gp"
@@ -203,7 +208,7 @@ class ModelSEEDReconstruction:
                 mdlutl = MSModelUtil(mdl)
                 mdllist[i] = mdlutl
                 if params["atp_safe"] and mdlutl == mdllist[0]:
-                    mdlutl.set_atputl(MSATPCorrection.build_default(mdlutl,templates["core"],atp_medias=[],forced_media=params["forced_atp_list"]))
+                    mdlutl.set_atputl(MSATPCorrection.build_default(mdlutl,templates["core"],atp_medias=[],forced_media=params["forced_atp_list"],default_media_path="/kb/module/data/atp_medias.tsv"))
                     mdlutl.atputl.evaluate_growth_media()
                     mdlutl.atputl.determine_growth_media()
                     mdlutl.atputl.apply_growth_media_gapfilling()
