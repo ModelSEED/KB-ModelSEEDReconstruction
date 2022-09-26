@@ -168,6 +168,7 @@ class ModelSEEDReconstruction:
         # return variables are: output
         #BEGIN build_metabolic_models
         #Processing parameters
+        print(json.dumps(params,indent=4))
         if self.method == None:
             self.method = "build_metabolic_models"
             self.params = params
