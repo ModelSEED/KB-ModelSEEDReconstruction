@@ -67,7 +67,7 @@ class ModelSEEDReconstruction:
                 'meta': {},
                 'provenance': [{
                     'description': '',
-                    'input_ws_objects': [self.input_objects],
+                    'input_ws_objects': self.input_objects,
                     'method': self.method,
                     'script_command_line': "",
                     'method_params': [self.params],
