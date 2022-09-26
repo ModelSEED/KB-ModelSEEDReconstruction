@@ -28,6 +28,14 @@ class SDKHelper:
         return params
     
     @staticmethod
+    def create_ref(id,workspace):
+        if isinstance(id, int):
+            id = str(id)
+        if isinstance(workspace, int):
+            workspace = str(workspace)    
+        return workspace+"/"+id
+        
+    @staticmethod
     def process_ws_ids(id_or_ref, workspace=None,no_ref=False):
         """
         IDs should always be processed through this function so we can interchangeably use

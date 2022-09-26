@@ -23,6 +23,7 @@ from installed_clients.DataFileUtilClient import DataFileUtil
 import pickle
 import pandas as pd
 
+
 def fix_genomescale_template(gs_template,core_template):
     for cpd in core_template.compcompounds:
         if cpd.id not in gs_template.compcompounds:
@@ -32,54 +33,6 @@ def fix_genomescale_template(gs_template,core_template):
             gs_template.reactions._replace_on_id(rxn)
         else:
             gs_template.reactions.append(rxn)
-           
-def build_report(table,workspace):
-    html_data = f"""
-<html>
-<header>
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-</header>
-<body>
-{table.to_html(columns=column_list,escape=False,notebook=False,table_id="table",index=False,justify="left")}
-<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<script>
-    $(document).ready( function () {{
-        $('#table').DataTable({{
-            // paging: false,    
-            // scrollY: 400,
-        }});
-    }});
-</script>
-</body>
-</html>
-"""
-    report_name = str(uuid.uuid4())
-    if not isinstance(workspace, str):
-        workspace = str(workspace)
-    html_report_folder = os.path.join(self.shared_folder, 'htmlreport')
-    os.makedirs(html_report_folder, exist_ok=True)
-    with open(os.path.join(html_report_folder, 'index.html'), 'w') as f:
-        f.write(html_data)
-    report_shock_id = self.dfu.file_to_shock({'file_path': html_report_folder,'pack': 'zip'})['shock_id']
-    html_output = {
-        'name' : 'index.html',
-        'shock_id': report_shock_id
-    }
-    report_params = {
-        'objects_created': [],
-        'workspace_name': workspace,
-        'html_links': [{
-            'name' : 'index.html',
-            'shock_id': report_shock_id
-        }],
-        'direct_html_link_index': 0,
-        'html_window_height': 700,
-        'report_object_name': report_name
-    }
-    report = KBaseReport(self.callback_url, token=self.token)
-    repout = report.create_extended_report(report_params)
-    return {"report_name":report_name,"report_ref":repout["ref"],'workspace_name':workspace}
 #END_HEADER
 
 
@@ -103,6 +56,64 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
+    def save_model(self,mdlutl,workspace):
+        fbamodel = CobraModelConverter(mdlutl.model, mdlutl.model.genome, mdlutl.model.template).build()  # later assign core template to None
+        #Parce gapfilling solutions to integrate gapfilling data into model object
+        if mdlutl in self.gapfillings:
+            mdlutl.create_kb_gapfilling_data(fbamodel)
+        self.kbase_api.save_object(mdlutl.model.id,workspace, "KBaseFBA.FBAModel", fbamodel)
+        self.obj_created.append(SDKHelper.create_ref(mdlutl.model.id,workspace))
+        #mdlutl.add_gapfilling_solution_to_kbase_model(kbmodel,gfresults,media_ref = media.info.workspace_id+"/"+media.info.id)
+    
+    def build_report(self,table,workspace):
+        #columns=column_list
+        html_data = f"""
+    <html>
+    <header>
+        <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    </header>
+    <body>
+    {table.to_html(escape=False,notebook=False,table_id="table",index=False,justify="left")}
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready( function () {{
+            $('#table').DataTable({{
+                // paging: false,    
+                // scrollY: 400,
+            }});
+        }});
+    </script>
+    </body>
+    </html>
+    """
+        report_name = str(uuid.uuid4())
+        if not isinstance(workspace, str):
+            workspace = str(workspace)
+        html_report_folder = os.path.join(self.shared_folder, 'htmlreport')
+        os.makedirs(html_report_folder, exist_ok=True)
+        with open(os.path.join(html_report_folder, 'index.html'), 'w') as f:
+            f.write(html_data)
+        report_shock_id = self.dfu.file_to_shock({'file_path': html_report_folder,'pack': 'zip'})['shock_id']
+        html_output = {
+            'name' : 'index.html',
+            'shock_id': report_shock_id
+        }
+        report_params = {
+            'objects_created': [self.obj_created],
+            'workspace_name': workspace,
+            'html_links': [{
+                'name' : 'index.html',
+                'shock_id': report_shock_id
+            }],
+            'direct_html_link_index': 0,
+            'html_window_height': 700,
+            'report_object_name': report_name
+        }
+        report = KBaseReport(self.callback_url, token=self.token)
+        repout = report.create_extended_report(report_params)
+        return {"report_name":report_name,"report_ref":repout["ref"],'workspace_name':workspace}
+    
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -117,6 +128,7 @@ class ModelSEEDReconstruction:
                             level=logging.INFO)
         self.dfu = DataFileUtil(self.callback_url)
         self.kbase_api = cobrakbase.KBaseAPI(token=self.token,config=self.config)
+        self.obj_created = []
         #END_CONSTRUCTOR
         pass
 
@@ -202,7 +214,9 @@ class ModelSEEDReconstruction:
             #Building model
             mdllist = []
             mdllist.append(MSBuilder(genome, curr_template).build(gid+params["suffix"], '0', False, False))
+            mdllist[0].template = curr_template
             mdllist.append(MSBuilder(genome, templates["core"]).build(gid+".core"+params["suffix"], '0', False, False))
+            mdllist[1].template = templates["core"]
             for i,mdl in enumerate(mdllist):
                 mdl.genome = genome
                 mdlutl = MSModelUtil(mdl)
@@ -243,18 +257,16 @@ class ModelSEEDReconstruction:
                     "internal_call":True
                 })
             else:
-                fbamodel = CobraModelConverter(mdllist[0], genome, None).build()  # later assign template to None
-                self.kbase_api.save_object(mdllist[0].model.id,params["workspace"], "KBaseFBA.FBAModel", fbamodel)
+                self.save_model(mdllist[0],params["workspace"])
             if params["output_core_models"]:
-                fbamodel = CobraModelConverter(mdllist[1], genome, None).build()  # later assign core template to None
-                self.kbase_api.save_object(mdllist[1].model.id,params["workspace"], "KBaseFBA.FBAModel", fbamodel)
+                self.save_model(mdllist[1],params["workspace"])
             #Filling in model output
             current_output["Reactions"] = len(mdllist[0].model.reactions)
             current_output["Model genes"] = len(mdllist[0].model.genes)
             mdllist[0].model.objective = "bio1"
             current_output["Growth"] = mdllist[0].model.slim_optimize()
             result_table = result_table.append(current_output, ignore_index = True)
-        output = build_report(result_table,params["workspace"])
+        output = self.build_report(result_table,params["workspace"])
         output["data"] = result_table.to_json()
         #END build_metabolic_models
 
@@ -305,11 +317,12 @@ class ModelSEEDReconstruction:
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
+                kbmodel = self.kbase_api.get_object(mdl_ref,None)
                 model = self.kbase_api.get_from_ws(mdl_ref,None)
-                model.id = model.id + params["suffix"]
-                mdlutl = MSModelUtil(model)
-                params["kbmodel_hash"][mdlutl] = self.kbase_api.get_object(mdl_ref,None)
-                params["model_objs"].append(mdlutl)
+                model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
+                model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
+                model.id = model.info[0] + params["suffix"]
+                params["model_objs"].append(MSModelUtil(model))
         #Retrieving media objects from references
         media_objs = []
         for media_ref in params["media_list"]:
@@ -337,23 +350,17 @@ class ModelSEEDReconstruction:
             mdlutl.set_gfutl(MSGapfill.build_default(mdlutl,params["atp_safe"],params["templates"],params["source_models"],
                      additional_tests,params["reaction_exlusion_list"]))
             #Iterating over all media specified for gapfilling
-            kbmodel = None
-            if mdlutl in params["kbmodel_hash"]:
-                kbmodel = params["kbmodel_hash"][mdlutl]
-            else:
-                kbmodel, fbamodel = CobraModelConverter(mdlutl.model, None, None).build()
             for media in media_objs:
                 #Gapfilling
                 gfresults = mdlutl.gfutl.run_gapfilling(media,params["model_objectives"][i],
                     params["minimum_objective"])
                 mdlutl.gfutl.integrate_gapfill_solution(gfresults)
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                solution = mdlutl.model.optimize()
-                mdlutl.add_gapfilling_solution_to_kbase_model(kbmodel,gfresults,media_ref = media.info.workspace_id+"/"+media.info.id)
+                #solution = mdlutl.model.optimize()
             #Saving completely gapfilled model
-            self.kbase_api.save_object(mdlutl.model.id,params["workspace"], "KBaseFBA.FBAModel",kbmodel)
+            self.save_model(mdlutl,params["workspace"])
         if not params["internal_call"]:
-            output = build_report(result_table,params["workspace"])
+            output = self.build_report(result_table,params["workspace"])
             output["data"] = result_table.to_json()
         else:
             output["data"] = result_table
