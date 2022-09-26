@@ -23,7 +23,6 @@ from installed_clients.DataFileUtilClient import DataFileUtil
 import pickle
 import pandas as pd
 
-
 def fix_genomescale_template(gs_template,core_template):
     for cpd in core_template.compcompounds:
         if cpd.id not in gs_template.compcompounds:
@@ -58,12 +57,32 @@ class ModelSEEDReconstruction:
     #BEGIN_CLASS_HEADER
     def save_model(self,mdlutl,workspace):
         fbamodel = CobraModelConverter(mdlutl.model, mdlutl.model.genome, mdlutl.model.template).build()  # later assign core template to None
-        #Parce gapfilling solutions to integrate gapfilling data into model object
-        if mdlutl in self.gapfillings:
-            mdlutl.create_kb_gapfilling_data(fbamodel)
-        self.kbase_api.save_object(mdlutl.model.id,workspace, "KBaseFBA.FBAModel", fbamodel)
+        json = fbamodel.get_data()
+        mdlutl.create_kb_gapfilling_data(json)
+        params = {
+            'objects': [{
+                'data': json,
+                'name': mdlutl.model.id,
+                'type': "KBaseFBA.FBAModel",
+                'meta': {},
+                'provenance': [{
+                    'description': '',
+                    'input_ws_objects': [self.input_objects],
+                    'method': self.method,
+                    'script_command_line': "",
+                    'method_params': [self.params],
+                    'service': 'ModelSEEDReconstruction',
+                    'service_ver': ModelSEEDReconstruction.VERSION,
+                    # 'time': '2015-12-15T22:58:55+0000'
+                }]
+            }]
+        }
+        if isinstance(workspace, int):
+            params["id"] = workspace
+        else:
+            params["workspace"] = workspace
+        self.kbase_api.ws_client.save_objects(params)
         self.obj_created.append(SDKHelper.create_ref(mdlutl.model.id,workspace))
-        #mdlutl.add_gapfilling_solution_to_kbase_model(kbmodel,gfresults,media_ref = media.info.workspace_id+"/"+media.info.id)
     
     def build_report(self,table,workspace):
         #columns=column_list
@@ -129,6 +148,9 @@ class ModelSEEDReconstruction:
         self.dfu = DataFileUtil(self.callback_url)
         self.kbase_api = cobrakbase.KBaseAPI(token=self.token,config=self.config)
         self.obj_created = []
+        self.input_objects = []
+        self.method = None
+        self.params = None
         #END_CONSTRUCTOR
         pass
 
@@ -145,6 +167,9 @@ class ModelSEEDReconstruction:
         # return variables are: output
         #BEGIN build_metabolic_models
         #Processing parameters
+        if self.method == None:
+            self.method = "build_metabolic_models"
+            self.params = params
         SDKHelper.validate_args(params,["workspace"],{
             "genome_refs":[],
             "run_gapfilling":False,
@@ -182,6 +207,7 @@ class ModelSEEDReconstruction:
                           "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":None}
         #Retrieving genomes and building models one by one
         for i,gen_ref in enumerate(params["genome_refs"]):
+            self.input_objects.append(gen_ref)
             genome = self.kbase_api.get_from_ws(gen_ref)
             #Initializing output row
             current_output = default_output.copy()
@@ -289,6 +315,9 @@ class ModelSEEDReconstruction:
         # return variables are: output
         #BEGIN gapfill_metabolic_models
         #Processing parameters
+        if self.method == None:
+            self.method = "gapfill_metabolic_models"
+            self.params = params
         SDKHelper.validate_args(params,["media_list","workspace"],{
             "model_list":None,
             "model_objectives":[],
@@ -317,6 +346,7 @@ class ModelSEEDReconstruction:
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
+                self.input_objects.append(mdl_ref)
                 kbmodel = self.kbase_api.get_object(mdl_ref,None)
                 model = self.kbase_api.get_from_ws(mdl_ref,None)
                 model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
@@ -326,6 +356,7 @@ class ModelSEEDReconstruction:
         #Retrieving media objects from references
         media_objs = []
         for media_ref in params["media_list"]:
+            self.input_objects.append(media_ref)
             media = self.kbase_api.get_from_ws(media_ref,None)
             media_objs.append(media)
         #Compiling additional tests
