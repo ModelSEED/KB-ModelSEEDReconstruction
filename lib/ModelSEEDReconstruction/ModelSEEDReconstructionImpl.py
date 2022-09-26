@@ -168,10 +168,27 @@ class ModelSEEDReconstruction:
         # return variables are: output
         #BEGIN build_metabolic_models
         #Processing parameters
-        print(json.dumps(params,indent=4))
         if self.method == None:
             self.method = "build_metabolic_models"
             self.params = params
+        print(json.dumps(params,indent=4))
+        if "genomes" in params:
+            params["genome_refs"] = params["genomes"]["genome_refs"]
+        if "reconstruction_parameters" in params:
+            params["suffix"] = params["reconstruction_parameters"]["suffix"]
+            params["output_core_models"] = params["reconstruction_parameters"]["output_core_models"]
+        if "gapfilling_parameters" in params:
+            params["run_gapfilling"] = params["gapfilling_parameters"]["run_gapfilling"]
+            params["gapfilling_media_list"] = params["gapfilling_parameters"]["gapfilling_media_list"]
+        if "atp_safe_parameters" in params:
+            params["atp_safe"] = params["atp_safe_parameters"]["atp_safe"]
+            params["forced_atp_list"] = params["atp_safe_parameters"]["forced_atp_list"]
+            params["automated_atp_evaluation"] = params["atp_safe_parameters"]["automated_atp_evaluation"]
+        if "template_parameters" in params:
+            params["gs_template"] = params["template_parameters"]["gs_template"]
+            params["gs_template_ref"] = params["template_parameters"]["gs_template_ref"]
+            params["core_template_ref"] = params["template_parameters"]["core_template_ref"]
+        print(json.dumps(params,indent=4))
         SDKHelper.validate_args(params,["workspace"],{
             "genome_refs":[],
             "run_gapfilling":False,

@@ -334,37 +334,24 @@
                     "target_type_transform": "resolved-ref"
                 },
                 {
-                    "input_parameter": "suffix",
-                    "target_property": "suffix"
+                    "target_property": "genomes",
+                    "input_parameter": "genomes"
                 },
                 {
-                    "target_property": "output_core_models",
-                    "input_parameter": "output_core_models"
+                    "input_parameter": "reconstruction_parameters",
+                    "target_property": "reconstruction_parameters"
                 },
                 {
-                    "target_property": "run_gapfilling",
-                    "input_parameter": "run_gapfilling"
+                    "target_property": "gapfilling_parameters",
+                    "input_parameter": "gapfilling_parameters"
                 },
                 {
-                    "target_property": "gapfilling_media_list",
-                    "input_parameter": "gapfilling_media_list",
-                    "target_type_transform": "resolved-ref"
+                    "target_property": "atp_safe_parameters",
+                    "input_parameter": "atp_safe_parameters"
                 },
                 {
-                    "target_property": "atp_safe",
-                    "input_parameter": "atp_safe"
-                },
-                {
-                    "target_property": "forced_atp_list",
-                    "input_parameter": "forced_atp_list"
-                },
-				{
-                    "target_property": "automated_atp_evaluation",
-                    "input_parameter": "automated_atp_evaluation"
-                },
-                {
-                    "target_property": "gs_template",
-                    "input_parameter": "gs_template"
+                    "target_property": "template_parameters",
+                    "input_parameter": "template_parameters"
                 },
                 {
                     "target_property": "gs_template_ref",
