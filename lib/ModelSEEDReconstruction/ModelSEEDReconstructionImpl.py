@@ -414,8 +414,6 @@ class ModelSEEDReconstruction:
         if not params["internal_call"]:
             output = self.build_report(result_table,params["workspace"])
             output["data"] = result_table.to_json()
-        else:
-            output["data"] = result_table
         #END gapfill_metabolic_models
 
         # At some point might do deeper type checking...
