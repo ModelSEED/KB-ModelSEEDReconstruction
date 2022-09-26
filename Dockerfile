@@ -32,8 +32,8 @@ RUN pip install cobra==0.25.0
 RUN pip install networkx
 RUN pip install chemw==0.3.2
 
-RUN pip install --use-deprecated=legacy-resolver git+https://github.com/ModelSEED/ModelSEEDpy.git@8a83e2ab6bb9a6ac44cff4978128a9aada1f16c6
-RUN pip install git+https://github.com/Fxe/cobrakbase.git@d0967661d0056d9449621e3e1c5f01d77b6c9108
+RUN pip install --use-deprecated=legacy-resolver git+https://github.com/ModelSEED/ModelSEEDpy.git@3a1fc3546287e7161c1814752b22dbd8bd07cd05
+RUN pip install git+https://github.com/Fxe/cobrakbase.git@3c0504280a17dba1c5a85a0396acd7bfd1d3a311
 
 # -----------------------------------------
 

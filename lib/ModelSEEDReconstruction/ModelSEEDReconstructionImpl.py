@@ -238,11 +238,11 @@ class ModelSEEDReconstruction:
                     "internal_call":True
                 })
             else:
-                kbmodel, fbamodel = CobraModelConverter(mdllist[0], None, None).build()
-                self.kbase_api.save_object(mdllist[0].model.id,params["workspace"], "KBaseFBA.FBAModel",kbmodel)
+                fbamodel = CobraModelConverter(mdllist[0], genome, None).build()  # later assign template to None
+                self.kbase_api.save_object(mdllist[0].model.id,params["workspace"], "KBaseFBA.FBAModel", fbamodel)
             if params["output_core_models"]:
-                kbmodel, fbamodel = CobraModelConverter(mdllist[1], None, None).build()
-                self.kbase_api.save_object(mdllist[1].model.id,params["workspace"], "KBaseFBA.FBAModel",kbmodel)
+                fbamodel = CobraModelConverter(mdllist[1], genome, None).build()  # later assign core template to None
+                self.kbase_api.save_object(mdllist[1].model.id,params["workspace"], "KBaseFBA.FBAModel", fbamodel)
             #Filling in model output
             current_output["Reactions"] = len(mdllist[0].model.reactions)
             current_output["Model genes"] = len(mdllist[0].model.genes)
