@@ -411,6 +411,7 @@ class ModelSEEDReconstruction:
                 #solution = mdlutl.model.optimize()
             #Saving completely gapfilled model
             self.save_model(mdlutl,params["workspace"])
+        output = {}
         if not params["internal_call"]:
             output = self.build_report(result_table,params["workspace"])
             output["data"] = result_table.to_json()
