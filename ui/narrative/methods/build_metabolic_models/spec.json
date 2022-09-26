@@ -11,7 +11,7 @@
         "metabolic_modeling"
     ],
     "widgets": {
-        "output": null,
+        "output": "no-display",
         "input": null
     },
     "parameter-groups": [
