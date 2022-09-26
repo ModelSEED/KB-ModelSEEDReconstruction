@@ -82,7 +82,7 @@ class ModelSEEDReconstruction:
         else:
             params["workspace"] = workspace
         self.kbase_api.ws_client.save_objects(params)
-        self.obj_created.append(SDKHelper.create_ref(mdlutl.model.id,workspace))
+        self.obj_created.append({"ref":SDKHelper.create_ref(mdlutl.model.id,workspace),"description":""})
     
     def build_report(self,table,workspace):
         #columns=column_list
@@ -119,7 +119,7 @@ class ModelSEEDReconstruction:
             'shock_id': report_shock_id
         }
         report_params = {
-            'objects_created': [self.obj_created],
+            'objects_created': self.obj_created,
             'workspace_name': workspace,
             'html_links': [{
                 'name' : 'index.html',
