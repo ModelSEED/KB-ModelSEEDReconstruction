@@ -2,7 +2,7 @@
 #BEGIN_HEADER
 import logging
 import os
-
+import copy
 import sys
 import json
 import cobra
@@ -171,6 +171,7 @@ class ModelSEEDReconstruction:
         if self.method == None:
             self.method = "build_metabolic_models"
             self.params = params
+            params = copy.deepcopy(self.params)
         print(json.dumps(params,indent=4))
         if "genomes" in params:
             params["genome_refs"] = params["genomes"]["genome_refs"]
@@ -188,7 +189,6 @@ class ModelSEEDReconstruction:
             params["gs_template"] = params["template_parameters"]["gs_template"]
             params["gs_template_ref"] = params["template_parameters"]["gs_template_ref"]
             params["core_template_ref"] = params["template_parameters"]["core_template_ref"]
-        print(json.dumps(params,indent=4))
         SDKHelper.validate_args(params,["workspace"],{
             "genome_refs":[],
             "run_gapfilling":False,
