@@ -73,7 +73,7 @@ name,wc_client,working_dir,module_dir,parent=None
         # return variables are: output
         #BEGIN build_metabolic_models
         #Processing parameters
-        mdlout = self.msrecon.build_metabolic_models(params)
+        output = self.msrecon.build_metabolic_models(params)
         output = self.build_report(output)
         #END build_metabolic_models
 
@@ -95,7 +95,7 @@ name,wc_client,working_dir,module_dir,parent=None
         # ctx is the context object
         # return variables are: output
         #BEGIN gapfill_metabolic_models
-        mdlout = self.msrecon.gapfill_metabolic_models(params)
+        output = self.msrecon.gapfill_metabolic_models(params)
         output = self.build_report(output)
         #END gapfill_metabolic_models
 
