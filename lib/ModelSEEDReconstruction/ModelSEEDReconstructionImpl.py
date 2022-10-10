@@ -55,7 +55,7 @@ class ModelSEEDReconstruction:
         self.kbreport = KBaseReport(self.callback_url,token=self.token)
         self.dfu = DataFileUtil(self.callback_url)
         config["version"] = self.VERSION
-        self.msrecon = ModelSEEDRecon("ModelSEEDReconstruction",self.wsclient,config['scratch'],"/Users/chenry/code/KB-ModelSEEDReconstruction",self.config)
+        self.msrecon = ModelSEEDRecon("ModelSEEDReconstruction",self.wsclient,config['scratch'],"/kb/module",self.config)
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
         #END_CONSTRUCTOR
