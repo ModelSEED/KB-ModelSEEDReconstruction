@@ -33,8 +33,7 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
-    def build_report(self,table):
-        output = self.msrecon.build_report(table)
+    def build_report(self,output):
         report_shock_id = self.dfu.file_to_shock({'file_path': output["file_path"],'pack': 'zip'})['shock_id']
         output["report_params"]["html_links"][0]["shock_id"] = report_shock_id
         repout = self.kbreport.create_extended_report(output["report_params"])
@@ -75,7 +74,7 @@ name,wc_client,working_dir,module_dir,parent=None
         #BEGIN build_metabolic_models
         #Processing parameters
         mdlout = self.msrecon.build_metabolic_models(params)
-        output = self.build_report(mdlout["data"])
+        output = self.build_report(output)
         #END build_metabolic_models
 
         # At some point might do deeper type checking...
@@ -97,7 +96,7 @@ name,wc_client,working_dir,module_dir,parent=None
         # return variables are: output
         #BEGIN gapfill_metabolic_models
         mdlout = self.msrecon.gapfill_metabolic_models(params)
-        output = self.build_report(mdlout["data"])
+        output = self.build_report(output)
         #END gapfill_metabolic_models
 
         # At some point might do deeper type checking...

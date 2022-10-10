@@ -77,7 +77,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "load_default_medias":True,
             "max_gapfilling":10,
             "gapfilling_delta":0,
-            "return_model_objects":True
+            "return_model_objects":False
         })
         #Preloading core and preselected template
         templates = {
