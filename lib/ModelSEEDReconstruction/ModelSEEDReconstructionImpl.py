@@ -33,8 +33,8 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
-    def build_report(self):
-        output = self.msrecon.build_report()
+    def build_report(self,table):
+        output = self.msrecon.build_report(table)
         report_shock_id = self.dfu.file_to_shock({'file_path': output["file_path"],'pack': 'zip'})['shock_id']
         output["report_params"]["html_links"][0]["shock_id"] = report_shock_id
         repout = self.kbreport.create_extended_report(output["report_params"])
