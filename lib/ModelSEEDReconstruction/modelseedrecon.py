@@ -18,6 +18,8 @@ import pickle
 
 logger = logging.getLogger(__name__)
 
+excluded_cpd = ["cpd22290","cpd11850"]
+
 def fix_genomescale_template(gs_template,core_template):
     for cpd in core_template.compcompounds:
         if cpd.id not in gs_template.compcompounds:
@@ -27,6 +29,10 @@ def fix_genomescale_template(gs_template,core_template):
             gs_template.reactions._replace_on_id(rxn)
         else:
             gs_template.reactions.append(rxn)
+    for rxn in gs_template.reactions:
+        for met in rxn.metabolites:
+            if met.id[0:8] in excluded_cpd:
+                gs_template.reactions.remove(rxn)
 
 class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,name,ws_client,working_dir,module_dir,config):
@@ -70,7 +76,8 @@ class ModelSEEDRecon(BaseModelingModule):
             "atp_medias":[],
             "load_default_medias":True,
             "max_gapfilling":10,
-            "gapfilling_delta":0
+            "gapfilling_delta":0,
+            "return_model_objects":True
         })
         #Preloading core and preselected template
         templates = {
@@ -95,6 +102,7 @@ class ModelSEEDRecon(BaseModelingModule):
                           "Model genes":None,"Reactions":None,"ATP yeilds":None,
                           "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":None}
         #Retrieving genomes and building models one by one
+        mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
             self.input_objects.append(gen_ref)
             genome = self.kbase_api.get_from_ws(gen_ref)
@@ -121,9 +129,9 @@ class ModelSEEDRecon(BaseModelingModule):
                     next
                 elif templates[template_type] == None:
                     if template_type == "gn":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV4","NewKBaseModelTemplates")
+                        templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV3","NewKBaseModelTemplates")
                     if template_type == "gp":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV4","NewKBaseModelTemplates")
+                        templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV3","NewKBaseModelTemplates")
                     fix_genomescale_template(templates[template_type],templates["core"])#Move to MSTemplate?
             curr_template = templates[template_type]
             #Building model
@@ -158,19 +166,23 @@ class ModelSEEDRecon(BaseModelingModule):
                     "templates":[curr_template] ,
                     "internal_call":True
                 })
-                current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
             else:
                 self.save_model(mdlutl,params["workspace"])
-            current_output["Reactions"] = len(mdlutl.model.reactions)
+                mdlutl.model.objective = "bio1"
+                mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(None)
+                current_output["Growth"] = "Complete:"+str(mdlutl.model.slim_optimize())
+            current_output["Reactions"] = mdlutl.nonexchange_reaction_count()
             current_output["Model genes"] = len(mdlutl.model.genes)
-            mdlutl.model.objective = "bio1"
-            current_output["Growth"] = mdlutl.model.slim_optimize()
             #if params["output_core_models"]:
             #TODO: Remove noncore reactions and change biomass and change model ID and then resave
             #Filling in model output
             result_table = result_table.append(current_output, ignore_index = True)
+            mdllist.append(mdlutl)
         output = self.build_report(result_table)
         output["data"] = result_table.to_json()
+        if params["return_model_objects"]:
+            output["model_objs"] = mdllist
+        return output
     
     def gapfill_metabolic_models(self,params):
         self.initialize_call("gapfill_metabolic_models",params,True)
@@ -210,11 +222,12 @@ class ModelSEEDRecon(BaseModelingModule):
                 model.id = model.info[0] + params["suffix"]
                 params["model_objs"].append(MSModelUtil(model))
         #Retrieving media objects from references
-        media_objs = []
+        params["media_objs"] = []
         for media_ref in params["media_list"]:
             self.input_objects.append(media_ref)
             media = self.kbase_api.get_from_ws(media_ref,None)
-            media_objs.append(media)
+            media.id = media.info.id
+            params["media_objs"].append(media)
         #Compiling additional tests
         additional_tests = []
         for i,limit_media in enumerate(params["limit_medias"]):
@@ -226,6 +239,9 @@ class ModelSEEDRecon(BaseModelingModule):
             })
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
+            current_output = default_output.copy()
+            if params["output_data"] and mdlutl in params["output_data"]:
+                current_output = params["output_data"][mdlutl]
             #Setting the objective
             if i < len(params["model_objectives"]):
                 if not params["model_objectives"][i]:
@@ -234,23 +250,39 @@ class ModelSEEDRecon(BaseModelingModule):
                 params["model_objectives"].append(params["default_objective"])
             #Creating gapfilling object and configuring solver
             #mdlutl.model.solver = config["solver"]
+            if mdlutl.atputl:
+                tests = mdlutl.atputl.build_tests()
+                for test in tests:
+                    additional_tests.append(test)
             msgapfill = MSGapfill(mdlutl,params["templates"],params["source_models"],
                      additional_tests,blacklist=params["reaction_exlusion_list"])
             #Iterating over all media specified for gapfilling
             mdlutl.gfutl.cumulative_gapfilling = []
-            for media in media_objs:
+            growth_array = []
+            for media in params["media_objs"]:
                 #Gapfilling
                 gfresults = msgapfill.run_gapfilling(media,params["model_objectives"][i],
                     params["minimum_objective"])
                 msgapfill.integrate_gapfill_solution(gfresults,mdlutl.gfutl.cumulative_gapfilling)
-                #mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                #solution = mdlutl.model.optimize()
+                mdlutl.model.objective = "bio1"
+                mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+                growth_array.append(media.id+":"+str(mdlutl.model.slim_optimize()))
+            current_output["Growth"] = "<br>".join(growth_array)
+            current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
+            #current_output["GF reasons"] = ""
+            #mdlutl.gfutl.link_gapfilling_to_biomass()
+            #for item in mdlutl.gfutl.cumulative_gapfilling:
+            #    if len(item) > 2 and len(item[2]) > 0:
+            #        if len(current_output["GF reasons"]) > 0:
+            #            current_output["GF reasons"] += "<br>"
+            #        current_output["GF reasons"] += item[0].id+item[1]+":"+",".join(item[2])
             #Saving completely gapfilled model
             self.save_model(mdlutl,params["workspace"])
         output = {}
         if not params["internal_call"]:
             output = self.build_report(result_table)
             output["data"] = result_table.to_json()
+        return output
             
     def build_report(self,table):
         #columns=column_list
