@@ -129,9 +129,9 @@ class ModelSEEDRecon(BaseModelingModule):
                     next
                 elif templates[template_type] == None:
                     if template_type == "gn":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV3","NewKBaseModelTemplates")
+                        templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV4","NewKBaseModelTemplates")
                     if template_type == "gp":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV3","NewKBaseModelTemplates")
+                        templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV4","NewKBaseModelTemplates")
                     fix_genomescale_template(templates[template_type],templates["core"])#Move to MSTemplate?
             curr_template = templates[template_type]
             #Building model
