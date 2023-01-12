@@ -6,14 +6,12 @@ import uuid
 import logging
 import json
 import pandas as pd
-import cobrakbase
 from optlang.symbolics import Zero, add
 from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection
-from cobrakbase.core.kbasefba.newmodeltemplate_builder import NewModelTemplateBuilder
 from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
-from ModelSEEDReconstruction.basemodelingmodule import BaseModelingModule
+from kbbasemodules.basemodelingmodule import BaseModelingModule
 import pickle
 
 logger = logging.getLogger(__name__)
@@ -35,8 +33,8 @@ def fix_genomescale_template(gs_template,core_template):
                 gs_template.reactions.remove(rxn)
 
 class ModelSEEDRecon(BaseModelingModule):
-    def __init__(self,name,ws_client,working_dir,module_dir,config):
-        BaseModelingModule.__init__(self,name,ws_client,working_dir,config)
+    def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
+        BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir,working_dir,token,clients,callback)
         self.module_dir = module_dir
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
@@ -77,7 +75,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "load_default_medias":True,
             "max_gapfilling":10,
             "gapfilling_delta":0,
-            "return_model_objects":False
+            "return_model_objects":True
         })
         #Preloading core and preselected template
         templates = {
@@ -132,6 +130,7 @@ class ModelSEEDRecon(BaseModelingModule):
                         templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV4","NewKBaseModelTemplates")
                     if template_type == "gp":
                         templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV4","NewKBaseModelTemplates")
+                    print(templates[template_type].reactions.rxn00102_c.complexes)
                     fix_genomescale_template(templates[template_type],templates["core"])#Move to MSTemplate?
             curr_template = templates[template_type]
             #Building model
@@ -140,7 +139,7 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl.template = curr_template#Move into MSBuilder?
             current_output["ATP yeilds"] = "NA"
             current_output["Core GF"] = "NA"  
-            mdlutl = MSModelUtil.get(mdl)
+            mdlutl = MSModelUtil.get(mdl)     
             if params["atp_safe"]:
                 atpcorrection = MSATPCorrection(mdlutl,templates["core"],params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
