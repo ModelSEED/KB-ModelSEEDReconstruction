@@ -12,25 +12,9 @@ from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from kbbasemodules.basemodelingmodule import BaseModelingModule
-import pickle
+
 
 logger = logging.getLogger(__name__)
-
-excluded_cpd = ["cpd22290","cpd11850"]
-
-def fix_genomescale_template(gs_template,core_template):
-    for cpd in core_template.compcompounds:
-        if cpd.id not in gs_template.compcompounds:
-            gs_template.compcompounds.append(cpd)
-    for rxn in core_template.reactions:
-        if rxn.id in gs_template.reactions:
-            gs_template.reactions._replace_on_id(rxn)
-        else:
-            gs_template.reactions.append(rxn)
-    for rxn in gs_template.reactions:
-        for met in rxn.metabolites:
-            if met.id[0:8] in excluded_cpd:
-                gs_template.reactions.remove(rxn)
 
 class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
@@ -79,21 +63,15 @@ class ModelSEEDRecon(BaseModelingModule):
         })
         #Preloading core and preselected template
         templates = {
-            "core" : self.kbase_api.get_from_ws("core_template_sulfur3","NewKBaseModelTemplates"),
+            "core" : self.get_template("core_template_sulfur3","NewKBaseModelTemplates"),
             "gp" : None,
             "gn" : None,
             "custom": None
         }
         if params["gs_template"] == "custom":
-            templates["custom"] = self.kbase_api.get_from_ws(params["gs_template_ref"],None)
+            templates["custom"] = self.get_gs_template(params["gs_template_ref"],None,templates["core"])
         #Initializing classifier
-        cls_pickle = self.module_dir+"/data/knn_ACNP_RAST_filter.pickle"
-        cls_features = self.module_dir+"/data/knn_ACNP_RAST_filter_features.json"
-        with open(cls_pickle, 'rb') as fh:
-            model_filter = pickle.load(fh)
-        with open(cls_features, 'r') as fh:
-            features = json.load(fh)
-        genome_classifier = MSGenomeClassifier(model_filter, features)
+        genome_classifier = self.get_classifier()
         #Initializing output data tables
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
@@ -102,8 +80,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Retrieving genomes and building models one by one
         mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
-            self.input_objects.append(gen_ref)
-            genome = self.kbase_api.get_from_ws(gen_ref)
+            genome = self.get_msgenome(gen_ref)
             #Initializing output row
             current_output = default_output.copy()
             comments = []
@@ -127,11 +104,9 @@ class ModelSEEDRecon(BaseModelingModule):
                     next
                 elif templates[template_type] == None:
                     if template_type == "gn":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramNegModelTemplateV4","NewKBaseModelTemplates")
+                        templates[template_type] = self.get_gs_template("GramNegModelTemplateV4","NewKBaseModelTemplates",templates["core"])
                     if template_type == "gp":
-                        templates[template_type] = self.kbase_api.get_from_ws("GramPosModelTemplateV4","NewKBaseModelTemplates")
-                    print(templates[template_type].reactions.rxn00102_c.complexes)
-                    fix_genomescale_template(templates[template_type],templates["core"])#Move to MSTemplate?
+                        templates[template_type] = self.get_gs_template("GramPosModelTemplateV4","NewKBaseModelTemplates",templates["core"])
             curr_template = templates[template_type]
             #Building model
             mdl = MSBuilder(genome, curr_template).build(gid+params["suffix"], '0', False, False)
