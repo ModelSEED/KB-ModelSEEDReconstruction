@@ -5,14 +5,15 @@ import sys
 import uuid
 import logging
 import json
+import jinja2
 import pandas as pd
 from optlang.symbolics import Zero, add
+from cobrakbase.core.kbasefba import FBAModel
 from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection
 from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from kbbasemodules.basemodelingmodule import BaseModelingModule
-
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "custom": None
         }
         if params["gs_template"] == "custom":
-            templates["custom"] = self.get_gs_template(params["gs_template_ref"],None,templates["core"])
+            templates["custom"] = self.get_template(params["gs_template_ref"],None)#,templates["core"])
         #Initializing classifier
         genome_classifier = self.get_classifier()
         #Initializing output data tables
@@ -104,17 +105,18 @@ class ModelSEEDRecon(BaseModelingModule):
                     next
                 elif templates[template_type] == None:
                     if template_type == "gn":
-                        templates[template_type] = self.get_gs_template("GramNegModelTemplateV4","NewKBaseModelTemplates",templates["core"])
+                        templates[template_type] = self.get_template("GramNegModelTemplateV4","NewKBaseModelTemplates")#,templates["core"])
                     if template_type == "gp":
-                        templates[template_type] = self.get_gs_template("GramPosModelTemplateV4","NewKBaseModelTemplates",templates["core"])
+                        templates[template_type] = self.get_template("GramPosModelTemplateV4","NewKBaseModelTemplates")#,templates["core"])
             curr_template = templates[template_type]
-            #Building model
-            mdl = MSBuilder(genome, curr_template).build(gid+params["suffix"], '0', False, False)
-            mdl.genome = genome#Move into MSBuilder?
-            mdl.template = curr_template#Move into MSBuilder?
+            #Building model            
+            base_model = FBAModel({'id':"Escherichia_coli_K-12_MG1655.RAST.mdl", 'name':'Escherichia_coli_K-12_MG1655'})
+            mdl = MSBuilder(genome, curr_template).build(base_model, '0', False, False)
+            mdl.genome = genome
+            mdl.template = curr_template
             current_output["ATP yeilds"] = "NA"
-            current_output["Core GF"] = "NA"  
-            mdlutl = MSModelUtil.get(mdl)     
+            current_output["Core GF"] = "NA" 
+            mdlutl = MSModelUtil.get(mdl)
             if params["atp_safe"]:
                 atpcorrection = MSATPCorrection(mdlutl,templates["core"],params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
@@ -152,7 +154,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Filling in model output
             result_table = result_table.append(current_output, ignore_index = True)
             mdllist.append(mdlutl)
-        output = self.build_report(result_table)
+        output = self.build_dataframe_report(result_table)
         output["data"] = result_table.to_json()
         if params["return_model_objects"]:
             output["model_objs"] = mdllist
@@ -199,8 +201,7 @@ class ModelSEEDRecon(BaseModelingModule):
         params["media_objs"] = []
         for media_ref in params["media_list"]:
             self.input_objects.append(media_ref)
-            media = self.kbase_api.get_from_ws(media_ref,None)
-            media.id = media.info.id
+            media = self.get_media(media_ref,None)
             params["media_objs"].append(media)
         #Compiling additional tests
         additional_tests = []
@@ -254,49 +255,24 @@ class ModelSEEDRecon(BaseModelingModule):
             self.save_model(mdlutl,params["workspace"])
         output = {}
         if not params["internal_call"]:
-            output = self.build_report(result_table)
+            output = self.build_dataframe_report(result_table)
             output["data"] = result_table.to_json()
         return output
             
-    def build_report(self,table):
-        #columns=column_list
-        html_data = f"""
-    <html>
-    <header>
-        <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    </header>
-    <body>
-    {table.to_html(escape=False,notebook=False,table_id="table",index=False,justify="left")}
-    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready( function () {{
-            $('#table').DataTable({{
-                // paging: false,    
-                // scrollY: 400,
-            }});
-        }});
-    </script>
-    </body>
-    </html>
-    """
-        report_name = str(uuid.uuid4())
-        html_report_folder = os.path.join(self.working_dir, 'htmlreport')
-        os.makedirs(html_report_folder, exist_ok=True)
-        with open(os.path.join(html_report_folder, 'index.html'), 'w') as f:
-            f.write(html_data)
-        return {
-            'data':table,
-            'file_path':os.path.join(html_report_folder, 'index.html'),
-            'report_params':{
-                'objects_created': self.obj_created,
-                'workspace_name': self.ws_name,
-                'html_links': [{
-                    'name' : 'index.html',
-                    'shock_id': None
-                }],
-                'direct_html_link_index': 0,
-                'html_window_height': 700,
-                'report_object_name': report_name
-            }
+    def build_dataframe_report(self,table):        
+        context = {
+            "initial_model":table.iloc[0]["Model"]
         }
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(self.module_dir+"/data/"),
+            autoescape=jinja2.select_autoescape(['html', 'xml']))
+        html = env.get_template("ReportTemplate.html").render(context)
+        os.makedirs(self.working_dir+"/html", exist_ok=True)
+        with open(self.working_dir+"/html/index.html", 'w') as f:
+            f.write(html)
+        #Creating data table file
+        for index, row in table.iterrows():
+            table.at[index,'Model'] = '<a href="javascript:view_annotations('+"'"+row["Model"]+"'"+')">'+row["Model"]+"</a>"
+        json_str = '{"data":'+table.to_json(orient='records')+'}'
+        with open(self.working_dir+"/html/data.json", 'w') as f:
+            f.write(json_str)
