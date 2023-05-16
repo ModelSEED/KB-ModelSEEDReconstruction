@@ -60,7 +60,9 @@ class ModelSEEDRecon(BaseModelingModule):
             "load_default_medias":True,
             "max_gapfilling":10,
             "gapfilling_delta":0,
-            "return_model_objects":True
+            "return_model_objects":True,
+            "return_data":True,
+            "save_report_to_kbase":True
         })
         #Preloading core and preselected template
         templates = {
@@ -154,8 +156,12 @@ class ModelSEEDRecon(BaseModelingModule):
             #Filling in model output
             result_table = result_table.append(current_output, ignore_index = True)
             mdllist.append(mdlutl)
-        output = self.build_dataframe_report(result_table)
-        output["data"] = result_table.to_json()
+        output = {}
+        if params["save_report_to_kbase"]:
+            self.build_dataframe_report(result_table)
+            output = self.save_report_to_kbase()
+        if params["return_data"]:
+            output["data"] = result_table.to_json()
         if params["return_model_objects"]:
             output["model_objs"] = mdllist
         return output
@@ -255,8 +261,11 @@ class ModelSEEDRecon(BaseModelingModule):
             self.save_model(mdlutl,params["workspace"])
         output = {}
         if not params["internal_call"]:
-            output = self.build_dataframe_report(result_table)
-            output["data"] = result_table.to_json()
+            if params["save_report_to_kbase"]:
+                self.build_dataframe_report(result_table)
+                output = self.save_report_to_kbase()
+            if params["return_data"]:
+                output["data"] = result_table.to_json()
         return output
             
     def build_dataframe_report(self,table):        
