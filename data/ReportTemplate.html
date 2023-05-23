@@ -61,21 +61,8 @@ div.tab button.active {
 			},
 			"columns": [{'data': 'Model'}, {'data': 'Genome'}, {'data': 'Genes'}, {'data': 'Class'}, {'data': 'Model genes'}, {'data': 'Reactions'}, {'data': 'ATP yeilds'}, {'data': 'Core GF'}, {'data': 'GS GF'}, {'data': 'Auxotrophy'}, {'data': 'Growth'}, {'data': 'Comments'}]
 		} );
-		$('#annotations').DataTable( {
-			"ajax": {
-				"url": "{{initial_model}}.json"
-			},
-			"columns": [{'data': 'id'}, {'data': 'function'}, {'data': 'score'}]
-		} );
 	} );
 	function view_annotations(model){
-		$('#reactions').DataTable().destroy();
-		$('#reactions').DataTable( {
-			"ajax": {
-				"url": model+".json"
-			},
-			"columns": [{'data': 'id'}, {'data': 'equation'}, {'data': 'genes'}]
-		} );
 		$('#nav-reactions-tab').tab('show');
 	}
 </script>
@@ -86,10 +73,10 @@ div.tab button.active {
 	</ul>
 	<div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-selection" role="tabpanel" aria-labelledby="nav-selection-tab"><table id="selection">
-			<thead><tr><th>Model</th><th>Type</th><th>Total genes</th><th>Annotated genes</th></tr></thead><tbody></tbody>
+			<thead><tr><th>Model</th><th>Genome</th><th>Genes</th><th>Class</th><th>Model genes</th><th>Reactions</th><th>ATP yields</th><th>Core GF</th><th>GS GF</th><th>Auxotrophy</th><th>Growth</th><th>Comments</th></tr></thead><tbody></tbody>
 		</table></div>
 		<div class="tab-pane fade" id="nav-reactions" role="tabpanel" aria-labelledby="nav-reactions-tab"><table width="100%" id="reactions">
-			<thead><tr><th>Reaction ID</th><th>Equation</th><th>Genes</th></tr></thead><tbody></tbody>
+			<p>Model view under development</p>
 		</table></div>
 	</div>
 </body>
