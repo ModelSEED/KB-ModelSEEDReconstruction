@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+sys.path.append("/deps/KBBaseModules/")
 import json
 from os.path import exists
 from ModelSEEDReconstruction.modelseedrecon import ModelSEEDRecon
