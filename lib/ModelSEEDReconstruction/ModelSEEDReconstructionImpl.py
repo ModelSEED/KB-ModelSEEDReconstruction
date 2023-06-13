@@ -60,7 +60,6 @@ class ModelSEEDReconstruction:
                             level=logging.INFO)
         #END_CONSTRUCTOR
         pass
-name,wc_client,working_dir,module_dir,parent=None
 
     def build_metabolic_models(self, ctx, params):
         """
