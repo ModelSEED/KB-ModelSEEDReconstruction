@@ -11,6 +11,10 @@ from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.WorkspaceClient import Workspace
 from installed_clients.DataFileUtilClient import DataFileUtil
 
+logger = logging.getLogger(__name__)
+logger.setLevel(
+    logging.INFO
+) 
 #END_HEADER
 
 
@@ -48,16 +52,9 @@ class ModelSEEDReconstruction:
         self.config = config
         self.config["ATP_media_workspace"] = "94026"
         if "appdev" in self.config["workspace-url"]:
-            self.config["ATP_media_workspace"] = "68393"
-        self.callback_url = os.environ['SDK_CALLBACK_URL']
-        self.token = os.environ['KB_AUTH_TOKEN']
-        self.wsclient = Workspace(self.config["workspace-url"], token=self.token)
-        self.kbreport = KBaseReport(self.callback_url,token=self.token)
-        self.dfu = DataFileUtil(self.callback_url)
+            self.config["ATP_media_workspace"] = "68393" 
         config["version"] = self.VERSION
-        self.msrecon = ModelSEEDRecon("ModelSEEDReconstruction",self.wsclient,config['scratch'],"/kb/module",self.config)
-        logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
-                            level=logging.INFO)
+        self.msrecon = ModelSEEDRecon(config,"/kb/module",config['scratch'],os.environ['KB_AUTH_TOKEN'],{},os.environ['SDK_CALLBACK_URL'])
         #END_CONSTRUCTOR
         pass
 
