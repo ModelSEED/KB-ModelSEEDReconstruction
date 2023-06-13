@@ -35,7 +35,7 @@ RUN pip install chemw==0.3.2
 RUN pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git@e0cd9aa
 RUN pip install git+https://github.com/Fxe/cobrakbase.git@3c0504280a17dba1c5a85a0396acd7bfd1d3a311
 
-RUN echo '0' >/dev/null && mkdir deps && cd deps && \
+RUN echo '1' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
 RUN mkdir test
 
