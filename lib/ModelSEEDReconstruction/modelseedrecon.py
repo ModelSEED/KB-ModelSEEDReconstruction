@@ -60,8 +60,8 @@ class ModelSEEDRecon(BaseModelingModule):
             "load_default_medias":True,
             "max_gapfilling":10,
             "gapfilling_delta":0,
-            "return_model_objects":True,
-            "return_data":True,
+            "return_model_objects":False,
+            "return_data":False,
             "save_report_to_kbase":True
         })
         #Preloading core and preselected template
