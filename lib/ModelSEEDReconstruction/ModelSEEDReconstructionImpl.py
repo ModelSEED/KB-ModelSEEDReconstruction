@@ -12,9 +12,8 @@ from installed_clients.WorkspaceClient import Workspace
 from installed_clients.DataFileUtilClient import DataFileUtil
 
 logger = logging.getLogger(__name__)
-logger.setLevel(
-    logging.INFO
-) 
+logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+    level=logging.INFO) 
 #END_HEADER
 
 
@@ -38,11 +37,6 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
-    def build_report(self,output):
-        report_shock_id = self.dfu.file_to_shock({'file_path': output["file_path"],'pack': 'zip'})['shock_id']
-        output["report_params"]["html_links"][0]["shock_id"] = report_shock_id
-        repout = self.kbreport.create_extended_report(output["report_params"])
-        return {"report_name":output["report_params"]["report_object_name"],"report_ref":repout["ref"],'workspace_name':self.msrecon.ws_name}
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -71,7 +65,6 @@ class ModelSEEDReconstruction:
         #BEGIN build_metabolic_models
         #Processing parameters
         output = self.msrecon.build_metabolic_models(params)
-        output = self.build_report(output)
         #END build_metabolic_models
 
         # At some point might do deeper type checking...
@@ -93,7 +86,6 @@ class ModelSEEDReconstruction:
         # return variables are: output
         #BEGIN gapfill_metabolic_models
         output = self.msrecon.gapfill_metabolic_models(params)
-        output = self.build_report(output)
         #END gapfill_metabolic_models
 
         # At some point might do deeper type checking...
