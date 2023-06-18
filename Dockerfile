@@ -29,7 +29,7 @@ RUN rm -rf /miniconda/lib/python3.6/site-packages/numpy
 RUN rm -rf /miniconda/lib/python3.6/site-packages/ruamel*
 RUN pip install --upgrade pip
 RUN pip install "numpy<1.24"
-RUN pip install cobra==0.25.0
+RUN pip install cobra
 RUN pip install networkx
 RUN pip install chemw==0.3.2
 
