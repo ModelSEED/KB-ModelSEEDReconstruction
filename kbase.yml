@@ -13,3 +13,5 @@ module-version:
 owners:
     [chenry]
 
+data-version:
+    0.0.1
