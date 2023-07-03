@@ -73,6 +73,8 @@ class ModelSEEDRecon(BaseModelingModule):
         }
         if params["gs_template"] == "custom":
             templates["custom"] = self.get_template(params["gs_template_ref"],None)#,templates["core"])
+        if params["core_template"] == "custom":
+            templates["core"] = self.get_template(params["core_template_ref"],None)#,templates["core"])
         #Initializing classifier
         genome_classifier = self.get_classifier()
         #Initializing output data tables
