@@ -141,7 +141,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "model_objs":[mdlutl],#
                     "atp_safe":params["atp_safe"],#
                     "workspace":params["workspace"],#
-                    "suffix":params["suffix"],#
+                    "suffix":None,#
                     "default_objective":"bio1",#
                     "output_data":{mdlutl:current_output},#
                     "forced_atp_list":params["forced_atp_list"],
@@ -200,13 +200,7 @@ class ModelSEEDRecon(BaseModelingModule):
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
-                self.input_objects.append(mdl_ref)
-                kbmodel = self.kbase_api.get_object(mdl_ref,None)
-                mdlutl = MSModelUtil(self.kbase_api.get_from_ws(mdl_ref,None))
-                mdlutl.model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
-                mdlutl.model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
-                mdlutl.wsid = mdlutl.model.info[0] + params["suffix"]
-                params["model_objs"].append(mdlutl)
+                params["model_objs"].append(self.get_model(self,mdl_ref))
         #Retrieving media objects from references
         params["media_objs"] = []
         for media_ref in params["media_list"]:
@@ -240,15 +234,14 @@ class ModelSEEDRecon(BaseModelingModule):
                 for test in tests:
                     additional_tests.append(test)
             msgapfill = MSGapfill(mdlutl,params["templates"],params["source_models"],
-                     additional_tests,blacklist=params["reaction_exlusion_list"])
+                     additional_tests,blacklist=params["reaction_exlusion_list"],default_target=params["model_objectives"][i],minimum_obj=params["minimum_objective"])
             #Iterating over all media specified for gapfilling
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
             for media in params["media_objs"]:
                 #Gapfilling
                 msgapfill.lp_filename = self.working_dir+"/"+mdlutl.model.id+".gapfill.lp"
-                gfresults = msgapfill.run_gapfilling(media,params["model_objectives"][i],
-                    params["minimum_objective"])
+                gfresults = msgapfill.run_gapfilling(media)
                 msgapfill.integrate_gapfill_solution(gfresults,mdlutl.gfutl.cumulative_gapfilling)
                 mdlutl.model.objective = "bio1"
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
@@ -263,7 +256,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #            current_output["GF reasons"] += "<br>"
             #        current_output["GF reasons"] += item[0].id+item[1]+":"+",".join(item[2])
             #Saving completely gapfilled model
-            self.save_model(mdlutl,params["workspace"])
+            self.save_model(mdlutl,params["workspace"],params["suffix"])
         output = {}
         if not params["internal_call"]:
             if params["save_report_to_kbase"]:
