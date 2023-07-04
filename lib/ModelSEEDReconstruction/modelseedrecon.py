@@ -130,6 +130,7 @@ class ModelSEEDRecon(BaseModelingModule):
                         current_output["ATP yeilds"] += "; "
                     current_output["ATP yeilds"] += test["media"].id+":"+str(test["threshold"])
                 current_output["Core GF"] = len(atpcorrection.cumulative_core_gapfilling)
+            self.print_json_debug_file("attributes",mdlutl.attributes)
             #Setting the model ID so the model is saved with the correct name in KBase
             mdlutl.wsid = gid+params["suffix"]
             #Running gapfilling
