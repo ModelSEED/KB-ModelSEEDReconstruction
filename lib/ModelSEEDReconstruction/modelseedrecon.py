@@ -130,6 +130,8 @@ class ModelSEEDRecon(BaseModelingModule):
                         current_output["ATP yeilds"] += "; "
                     current_output["ATP yeilds"] += test["media"].id+":"+str(test["threshold"])
                 current_output["Core GF"] = len(atpcorrection.cumulative_core_gapfilling)
+            #Setting the model ID so the model is saved with the correct name in KBase
+            mdlutl.wsid = gid+params["suffix"]
             #Running gapfilling
             current_output["GS GF"] = "NA"
             current_output["Auxotrophy"] = "NA"
@@ -200,11 +202,11 @@ class ModelSEEDRecon(BaseModelingModule):
             for mdl_ref in params["model_list"]:
                 self.input_objects.append(mdl_ref)
                 kbmodel = self.kbase_api.get_object(mdl_ref,None)
-                model = self.kbase_api.get_from_ws(mdl_ref,None)
-                model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
-                model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
-                model.id = model.info[0] + params["suffix"]
-                params["model_objs"].append(MSModelUtil(model))
+                mdlutl = MSModelUtil(self.kbase_api.get_from_ws(mdl_ref,None))
+                mdlutl.model.genome = self.kbase_api.get_from_ws(kbmodel["genome_ref"],None)
+                mdlutl.model.template = self.kbase_api.get_from_ws(kbmodel["template_ref"],None)
+                mdlutl.wsid = mdlutl.model.info[0] + params["suffix"]
+                params["model_objs"].append(mdlutl)
         #Retrieving media objects from references
         params["media_objs"] = []
         for media_ref in params["media_list"]:
@@ -244,6 +246,7 @@ class ModelSEEDRecon(BaseModelingModule):
             growth_array = []
             for media in params["media_objs"]:
                 #Gapfilling
+                msgapfill.lp_filename = self.working_dir+"/"+mdlutl.model.id+".gapfill.lp"
                 gfresults = msgapfill.run_gapfilling(media,params["model_objectives"][i],
                     params["minimum_objective"])
                 msgapfill.integrate_gapfill_solution(gfresults,mdlutl.gfutl.cumulative_gapfilling)
