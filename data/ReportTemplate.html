@@ -50,6 +50,20 @@ div.tab button.active {
 </style>
 </header>
 <body>
+<div>
+	<ul class="nav nav-tabs" id="nav-tab" role="tablist">
+        <li><a class="nav-item nav-link active" id="nav-selection-tab" data-toggle="tab" href="#nav-selection" role="tab" aria-controls="nav-selection" aria-selected="true">Model selection</a> </li>
+        <li><a class="nav-item nav-link" id="nav-reactions-tab" data-toggle="tab" href="#nav-reactions" role="tab" aria-controls="nav-reactions" aria-selected="false">Reactions</a> </li>
+	</ul>
+	<div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-selection" role="tabpanel" aria-labelledby="nav-selection-tab"><table id="selection">
+			<thead><tr><th>Model</th><th>Genome</th><th>Genes</th><th>Class</th><th>Model genes</th><th>Reactions</th><th>ATP yields</th><th>Core GF</th><th>GS GF</th><th>Auxotrophy</th><th>Growth</th><th>Comments</th></tr></thead><tbody></tbody>
+		</table></div>
+		<div class="tab-pane fade" id="nav-reactions" role="tabpanel" aria-labelledby="nav-reactions-tab"><table width="100%" id="reactions">
+			<p>Model view under development</p>
+		</table></div>
+	</div>
+</body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
@@ -66,18 +80,4 @@ div.tab button.active {
 		$('#nav-reactions-tab').tab('show');
 	}
 </script>
-<div>
-	<ul class="nav nav-tabs" id="nav-tab" role="tablist">
-        <li><a class="nav-item nav-link active" id="nav-selection-tab" data-toggle="tab" href="#nav-selection" role="tab" aria-controls="nav-selection" aria-selected="true">Model selection</a> </li>
-        <li><a class="nav-item nav-link" id="nav-reactions-tab" data-toggle="tab" href="#nav-reactions" role="tab" aria-controls="nav-reactions" aria-selected="false">Reactions</a> </li>
-	</ul>
-	<div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="nav-selection" role="tabpanel" aria-labelledby="nav-selection-tab"><table id="selection">
-			<thead><tr><th>Model</th><th>Genome</th><th>Genes</th><th>Class</th><th>Model genes</th><th>Reactions</th><th>ATP yields</th><th>Core GF</th><th>GS GF</th><th>Auxotrophy</th><th>Growth</th><th>Comments</th></tr></thead><tbody></tbody>
-		</table></div>
-		<div class="tab-pane fade" id="nav-reactions" role="tabpanel" aria-labelledby="nav-reactions-tab"><table width="100%" id="reactions">
-			<p>Model view under development</p>
-		</table></div>
-	</div>
-</body>
 </html>

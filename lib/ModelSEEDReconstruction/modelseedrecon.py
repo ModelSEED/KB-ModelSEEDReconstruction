@@ -144,7 +144,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "internal_call":True
                 })
             else:
-                self.save_model(mdlutl,params["workspace"])
+                self.save_model(mdlutl,params["workspace"],params["suffix"])
                 mdlutl.model.objective = "bio1"
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(None)
                 current_output["Growth"] = "Complete:"+str(mdlutl.model.slim_optimize())
