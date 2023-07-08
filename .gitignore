@@ -2,3 +2,5 @@
 test_local
 sdk.cfg
 *.pyc
+.settings/*
+notebooks/*
