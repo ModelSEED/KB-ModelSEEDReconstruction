@@ -144,7 +144,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "internal_call":True
                 })
             else:
-                self.save_model(mdlutl,params["workspace"],params["suffix"])
+                self.save_model(mdlutl,params["workspace"],None,params["suffix"])
                 mdlutl.model.objective = "bio1"
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(None)
                 current_output["Growth"] = "Complete:"+str(mdlutl.model.slim_optimize())
@@ -255,7 +255,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #            current_output["GF reasons"] += "<br>"
             #        current_output["GF reasons"] += item[0].id+item[1]+":"+",".join(item[2])
             #Saving completely gapfilled model
-            self.save_model(mdlutl,params["workspace"],params["suffix"])
+            self.save_model(mdlutl,params["workspace"],None,params["suffix"])
         output = {}
         if not params["internal_call"]:
             if params["save_report_to_kbase"]:
