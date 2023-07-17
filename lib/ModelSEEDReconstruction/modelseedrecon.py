@@ -112,6 +112,9 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl = MSBuilder(genome, curr_template).build(base_model, '0', False, False)
             mdl.genome = genome
             mdl.template = curr_template
+            mdl.core_template_ref = str(self.templates["core"].info)
+            mdl.genome_ref = str(genome.info)
+            mdl.template_ref = str(curr_template.info)
             current_output["ATP yeilds"] = "NA"
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
@@ -124,7 +127,6 @@ class ModelSEEDRecon(BaseModelingModule):
                         current_output["ATP yeilds"] += "; "
                     current_output["ATP yeilds"] += test["media"].id+":"+str(test["threshold"])
                 current_output["Core GF"] = len(atpcorrection.cumulative_core_gapfilling)
-            self.print_json_debug_file("attributes.json",mdlutl.attributes)
             #Setting the model ID so the model is saved with the correct name in KBase
             mdlutl.wsid = gid+params["suffix"]
             #Running gapfilling
