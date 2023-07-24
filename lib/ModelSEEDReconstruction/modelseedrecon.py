@@ -93,6 +93,7 @@ class ModelSEEDRecon(BaseModelingModule):
             comments.append("Other annotation priorities not supported by this app yet. Using RAST.")
             if template_type == "auto":
                 current_output["Class"] = genome_classifier.classify(genome)
+                print(current_output["Class"])
                 if current_output["Class"] == "P":
                     template_type = "gp"
                 elif current_output["Class"] == "N" or current_output["Class"] == "--":
@@ -105,7 +106,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     if template_type == "gn":
                         self.templates[template_type] = self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates")#,templates["core"])
                     if template_type == "gp":
-                        self.templates[template_type] = self.get_template("GramPosModelTemplateV4","NewKBaseModelTemplates")#,templates["core"])
+                        self.templates[template_type] = self.get_template("GramPosModelTemplateV5","NewKBaseModelTemplates")#,templates["core"])
             curr_template = self.templates[template_type]
             #Building model            
             base_model = FBAModel({'id':current_output["Model"], 'name':genome.scientific_name})
