@@ -103,7 +103,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     next
                 elif self.templates[template_type] == None:
                     if template_type == "gn":
-                        self.templates[template_type] = self.get_template("GramNegModelTemplateV4","NewKBaseModelTemplates")#,templates["core"])
+                        self.templates[template_type] = self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates")#,templates["core"])
                     if template_type == "gp":
                         self.templates[template_type] = self.get_template("GramPosModelTemplateV4","NewKBaseModelTemplates")#,templates["core"])
             curr_template = self.templates[template_type]
