@@ -192,6 +192,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "atp_medias":[],
             "load_default_atp_medias":True,
             "max_atp_gapfilling":0,
+            "gapfilling_delta":0,
             "return_data":False,
             "save_report_to_kbase":True
         })
