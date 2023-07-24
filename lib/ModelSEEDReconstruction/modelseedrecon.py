@@ -188,7 +188,12 @@ class ModelSEEDRecon(BaseModelingModule):
             "default_objective":"bio1",
             "kbmodel_hash":{},
             "output_data":None,
-            "internal_call":False
+            "internal_call":False,
+            "atp_medias":[],
+            "load_default_atp_medias":True,
+            "max_atp_gapfilling":0,
+            "return_data":False,
+            "save_report_to_kbase":True
         })
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
@@ -228,7 +233,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Computing tests for ATP safe gapfilling
             if params["atp_safe"]:
                 if not mdlutl.atputl:
-                    atpcorrection = MSATPCorrection(mdlutl,self.templates["core"],params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
+                    atpcorrection = MSATPCorrection(mdlutl,self.templates["core"],params["atp_medias"],load_default_medias=params["load_default_atp_medias"],max_gapfilling=params["max_atp_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                     tests = atpcorrection.run_atp_correction()
                     additional_tests.extend(tests)
                 else:
