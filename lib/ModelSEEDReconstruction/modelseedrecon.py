@@ -198,7 +198,7 @@ class ModelSEEDRecon(BaseModelingModule):
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
-                params["model_objs"].append(self.get_model(self,mdl_ref))
+                params["model_objs"].append(self.get_model(mdl_ref))
         #Retrieving media objects from references
         params["media_objs"] = []
         for media_ref in params["media_list"]:
