@@ -243,7 +243,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Creating gapfilling object and configuring solver
             #mdlutl.model.solver = config["solver"]
             if not params["templates"]:
-                params["templates"] = self.get_template(mdlutl.model.template_ref)
+                params["templates"] = [self.get_template(mdlutl.model.template_ref)]
             msgapfill = MSGapfill(mdlutl,params["templates"],params["source_models"],
                      additional_tests,blacklist=params["reaction_exlusion_list"],default_target=params["model_objectives"][i],minimum_obj=params["minimum_objective"])
             #Running gapfilling in all conditions
