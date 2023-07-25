@@ -1,5 +1,5 @@
 {
-    "name": "build_metabolic_models",
+    "name": "gapfill_metabolic_models",
     "ver": "0.0.1",
     "authors": [
         "chenry"
@@ -14,119 +14,45 @@
         "output": "no-display",
         "input": null
     },
-    "parameter-groups": [
-        {
-            "id": "genomes",
-            "parameters": [
-                "genome_refs"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "reconstruction_parameters",
-            "parameters": [
-                "suffix"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "gapfilling_parameters",
-            "parameters": [
-                "run_gapfilling",
-                "gapfilling_media_list"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "atp_safe_parameters",
-            "parameters": [
-                "atp_safe",
-                "forced_atp_list",
-				"automated_atp_evaluation"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "template_parameters",
-            "parameters": [
-                "gs_template",
-                "gs_template_ref",
-                "core_template_ref"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        }
-    ],
     "parameters": [
         {
-            "id": "genome_refs",
+            "id": "model_list",
             "field_type": "text",
             "default_values": [
                 ""
             ],
             "text_options": {
                 "valid_ws_types": [
-                    "KBaseGenomes.Genome","KBaseSearch.GenomeSet"
+                    "KBaseFBA.FBAModel"
                 ]
             },
             "allow_multiple": true,
             "optional": false,
             "advanced": false
-        },
-        {
+        },{
             "id": "suffix",
             "field_type": "text",
             "default_values": [
-                ".mdl"
+                ".gf"
             ],
             "allow_multiple": false,
             "optional": false,
             "advanced": false
-        },
-        {
-            "id": "run_gapfilling",
-            "field_type": "checkbox",
-            "default_values": [
-                "1"
-            ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
-            },
-            "allow_multiple": false,
-            "optional": false,
-            "advanced": false
-        },
-        {
-            "id": "gapfilling_media_list",
-            "field_type": "text",
-            "default_values": [
-                ""
-            ],
-            "text_options": {
-                "valid_ws_types": [
-                    "KBaseBiochem.Media"
-                ]
-            },
-            "allow_multiple": true,
-            "optional": true,
-            "advanced": false
-        },
-        {
+        },{
+			 "id" : "source_models",
+			 "field_type" : "text",
+			 "default_values" : [
+				""
+			 ],
+			 "text_options" : {
+				"valid_ws_types" : [
+				   "KBaseFBA.FBAModel"
+				]
+			 },
+			 "allow_multiple" : true,
+			 "optional" : true,
+			 "advanced" : true
+		},{
             "id": "atp_safe",
             "field_type": "checkbox",
             "default_values": [
@@ -139,22 +65,45 @@
             "allow_multiple": false,
             "optional": false,
             "advanced": true
-        },
-        {
-            "id": "automated_atp_evaluation",
-            "field_type": "checkbox",
+        },{
+         "text_options" : {
+            "validate_as" : "float"
+         },
+         "field_type" : "text",
+         "allow_multiple" : false,
+         "optional" : false,
+         "advanced" : true,
+         "default_values" : [
+            "0.01"
+         ],
+         "id" : "minimum_objective"
+		},{
+            "id": "media_list",
+            "field_type": "text",
             "default_values": [
-                "1"
+                ""
             ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
+            "text_options": {
+                "valid_ws_types": [
+                    "KBaseBiochem.Media"
+                ]
             },
-            "allow_multiple": false,
+            "allow_multiple": true,
             "optional": false,
-            "advanced": true
-        },
-        {
+            "advanced": false
+        },{
+			"id" : "default_objective",
+			"text_options" : {
+				"valid_ws_types" : []
+			},
+			"default_values" : [
+				"bio1"
+			],
+			"field_type" : "text",
+			"allow_multiple" : false,
+			"optional" : false,
+			"advanced" : false
+        },{
             "id": "forced_atp_list",
             "field_type": "dropdown",
             "default_values": [
@@ -388,144 +337,52 @@
             "allow_multiple": true,
             "optional": true,
             "advanced": true
-        },
-        {
-            "id": "gs_template",
-            "field_type": "dropdown",
-            "default_values": [
-                "auto"
-            ],
-            "dropdown_options": {
-                "options": [
-                    {
-                        "id": "auto",
-                        "value": "auto",
-                        "display": "Automatic selection",
-                        "ui_name": "Automatic selection"
-                    },
-                    {
-                        "id": "old_gramneg",
-                        "value": "old_gramneg",
-                        "display": "Legacy gram negative",
-                        "ui_name": "Legacy gram negative"
-                    },
-                    {
-                        "id": "old_grampos",
-                        "value": "old_grampos",
-                        "display": "Legacy gram positive",
-                        "ui_name": "Legacy gram positive"
-                    },
-                    {
-                        "id": "gramneg",
-                        "value": "gramneg",
-                        "display": "Gram negative",
-                        "ui_name": "Gram negative"
-                    },
-                    {
-                        "id": "grampos",
-                        "value": "grampos",
-                        "display": "Gram positive",
-                        "ui_name": "Gram positive"
-                    },
-                    {
-                        "id": "archaea",
-                        "value": "archaea",
-                        "display": "Archaea",
-                        "ui_name": "Archaea"
-                    },
-                    {
-                        "id": "core",
-                        "value": "core",
-                        "display": "Core metabolism",
-                        "ui_name": "Core metabolism"
-                    },
-                    {
-                        "id": "custom",
-                        "value": "custom",
-                        "display": "Custom (select template)",
-                        "ui_name": "Custom (select template)"
-                    }
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },
-        {
-            "id": "gs_template_ref",
-            "field_type": "text",
-            "default_values": [
-                ""
-            ],
-            "text_options": {
-                "valid_ws_types": [
-                    "KBaseFBA.NewModelTemplate"
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },
-        {
-            "id": "core_template_ref",
-            "field_type": "text",
-            "default_values": [
-                ""
-            ],
-            "text_options": {
-                "valid_ws_types": [
-                    "KBaseFBA.NewModelTemplate"
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
         }
     ],
     "behavior": {
         "service-mapping": {
             "url": "",
             "name": "ModelSEEDReconstruction",
-            "method": "build_metabolic_models",
+            "method": "gapfill_metabolic_models",
             "input_mapping": [
                 {
                     "target_property": "workspace",
                     "narrative_system_variable": "workspace"
                 },
                 {
-                    "target_property": "genome_refs",
-                    "input_parameter": "genome_refs",
+                    "target_property": "model_list",
+                    "input_parameter": "model_list",
+                    "target_type_transform": "resolved-ref"
+                },
+            	{
+                    "target_property": "source_models",
+                    "input_parameter": "source_models",
                     "target_type_transform": "resolved-ref"
                 },
                 {
-                    "target_property": "genomes",
-                    "input_parameter": "genomes"
-                },
-                {
-                    "input_parameter": "reconstruction_parameters",
-                    "target_property": "reconstruction_parameters"
-                },
-                {
-                    "target_property": "gapfilling_parameters",
-                    "input_parameter": "gapfilling_parameters"
-                },
-                {
-                    "target_property": "atp_safe_parameters",
-                    "input_parameter": "atp_safe_parameters"
-                },
-                {
-                    "target_property": "template_parameters",
-                    "input_parameter": "template_parameters"
-                },
-                {
-                    "target_property": "gs_template_ref",
-                    "input_parameter": "gs_template_ref",
+                    "target_property": "media_list",
+                    "input_parameter": "media_list",
                     "target_type_transform": "resolved-ref"
                 },
                 {
-                    "target_property": "core_template_ref",
-                    "input_parameter": "core_template_ref",
-                    "target_type_transform": "resolved-ref"
+                    "target_property": "suffix",
+                    "input_parameter": "suffix"
+                },
+                {
+                    "input_parameter": "atp_safe",
+                    "target_property": "atp_safe"
+                },
+                {
+                    "target_property": "minimum_objective",
+                    "input_parameter": "minimum_objective"
+                },
+                {
+                    "target_property": "default_objective",
+                    "input_parameter": "default_objective"
+                },
+                {
+                    "target_property": "forced_atp_list",
+                    "input_parameter": "forced_atp_list"
                 }
             ],
             "output_mapping": [
