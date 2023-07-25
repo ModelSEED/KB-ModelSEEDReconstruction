@@ -139,7 +139,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "model_objs":[mdlutl],#
                     "atp_safe":params["atp_safe"],#
                     "workspace":params["workspace"],#
-                    "suffix":None,#
+                    "suffix":"",#
                     "default_objective":"bio1",#
                     "output_data":{mdlutl:current_output},#
                     "forced_atp_list":params["forced_atp_list"],
