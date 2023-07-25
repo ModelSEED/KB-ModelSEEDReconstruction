@@ -223,6 +223,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
+            current_output["Model"] = mdlutl.wsid+params["suffix"]    
             if params["output_data"] and mdlutl in params["output_data"]:
                 current_output = params["output_data"][mdlutl]
             #Setting the objective
@@ -258,6 +259,8 @@ class ModelSEEDRecon(BaseModelingModule):
                 growth_array.append(media.id+":"+str(mdlutl.model.slim_optimize()))
             current_output["Growth"] = "<br>".join(growth_array)
             current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
+            current_output["Reactions"] = mdlutl.nonexchange_reaction_count()
+            current_output["Model genes"] = len(mdlutl.model.genes)
             #current_output["GF reasons"] = ""
             #mdlutl.gfutl.link_gapfilling_to_biomass()
             #for item in mdlutl.gfutl.cumulative_gapfilling:
