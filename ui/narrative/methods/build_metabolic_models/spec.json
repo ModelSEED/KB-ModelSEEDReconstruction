@@ -14,63 +14,6 @@
         "output": "no-display",
         "input": null
     },
-    "parameter-groups": [
-        {
-            "id": "genomes",
-            "parameters": [
-                "genome_refs"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "reconstruction_parameters",
-            "parameters": [
-                "suffix"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "gapfilling_parameters",
-            "parameters": [
-                "run_gapfilling",
-                "gapfilling_media_list"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "atp_safe_parameters",
-            "parameters": [
-                "atp_safe",
-                "forced_atp_list",
-				"automated_atp_evaluation"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        },
-        {
-            "id": "template_parameters",
-            "parameters": [
-                "gs_template",
-                "gs_template_ref",
-                "core_template_ref"
-            ],
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "with_border": true
-        }
-    ],
     "parameters": [
         {
             "id": "genome_refs",
@@ -498,24 +441,37 @@
                     "target_type_transform": "resolved-ref"
                 },
                 {
-                    "target_property": "genomes",
-                    "input_parameter": "genomes"
+                    "target_property": "gapfilling_media_list",
+                    "input_parameter": "gapfilling_media_list",
+                    "target_type_transform": "resolved-ref"
                 },
                 {
-                    "input_parameter": "reconstruction_parameters",
-                    "target_property": "reconstruction_parameters"
+                    "target_property": "suffix",
+                    "input_parameter": "suffix"
                 },
                 {
-                    "target_property": "gapfilling_parameters",
-                    "input_parameter": "gapfilling_parameters"
+                    "input_parameter": "run_gapfilling",
+                    "target_property": "run_gapfilling"
                 },
                 {
-                    "target_property": "atp_safe_parameters",
-                    "input_parameter": "atp_safe_parameters"
+                    "target_property": "gapfilling_media_list",
+                    "input_parameter": "gapfilling_media_list"
                 },
                 {
-                    "target_property": "template_parameters",
-                    "input_parameter": "template_parameters"
+                    "target_property": "atp_safe",
+                    "input_parameter": "atp_safe"
+                },
+                {
+                    "target_property": "automated_atp_evaluation",
+                    "input_parameter": "automated_atp_evaluation"
+                },
+                {
+                    "target_property": "forced_atp_list",
+                    "input_parameter": "forced_atp_list"
+                },
+                {
+                    "target_property": "gs_template",
+                    "input_parameter": "gs_template"
                 },
                 {
                     "target_property": "gs_template_ref",

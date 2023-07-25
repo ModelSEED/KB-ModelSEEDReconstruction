@@ -43,12 +43,6 @@ parameters :
         short-hint : |
             Suffix placed on the genome names when the completed model is saved. Must have a value.
     
-    output_core_models :
-        ui-name : |
-            Save core models?
-        short-hint : |
-            Check this box to save core models created during reconstruction process, in addition to genome-scale models.
-
     run_gapfilling :
         ui-name : |
             Gapfill models?
@@ -100,33 +94,6 @@ parameters :
             Custom core template for reconstruction
         short-hint : |
             Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.This input enables users to specify their own custom core template for use in model reconstruction.
-
-parameter-groups:
-  genomes:
-    ui-name: |
-      Genome selection
-    short-hint: |
-      Select the genomes for which the models will be constructed. You can also specify the order in which different annotation sources will be used.
-  reconstruction_parameters:
-    ui-name: |
-      Output parameters
-    short-hint: |
-      Set the suffix to be used when saving the output model. You can also request to save the core-version of the model.
-  template_parameters:
-    ui-name: |
-      Template selection
-    short-hint: |
-      Select the template to use when building models of all genomes. Auto means ModelSEED2 will decide the correct template based on genome classifiers.
-  gapfilling_parameters:
-    ui-name: |
-      Gapfilling parameters
-    short-hint: |
-      Specify if the model should be gapfilled and what media the gapfilling should be done in.
-  atp_safe_parameters:
-    ui-name: |
-      ATP correction parameters
-    short-hint: |
-      Specify which ATP media the model should grow on, or indicate if the model should decide this for itself. If you specify "auto" and specific media, the model will predict conditions then add the media to those conditions.
 
 icon: modelseed-teal.png
 
