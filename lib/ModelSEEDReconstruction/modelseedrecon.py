@@ -30,7 +30,7 @@ class ModelSEEDRecon(BaseModelingModule):
             params["genome_refs"] = params["genomes"]["genome_refs"]
         if "reconstruction_parameters" in params:
             params["suffix"] = params["reconstruction_parameters"]["suffix"]
-            params["output_core_models"] = params["reconstruction_parameters"]["output_core_models"]
+            #params["output_core_models"] = params["reconstruction_parameters"]["output_core_models"]
         if "gapfilling_parameters" in params:
             params["run_gapfilling"] = params["gapfilling_parameters"]["run_gapfilling"]
             params["gapfilling_media_list"] = params["gapfilling_parameters"]["gapfilling_media_list"]
