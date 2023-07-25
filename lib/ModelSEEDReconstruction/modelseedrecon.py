@@ -267,6 +267,8 @@ class ModelSEEDRecon(BaseModelingModule):
             #        current_output["GF reasons"] += item[0].id+item[1]+":"+",".join(item[2])
             #Saving completely gapfilled model
             self.save_model(mdlutl,params["workspace"],None,params["suffix"])
+            if not params["internal_call"]:
+                result_table = result_table.append(current_output, ignore_index = True)
         output = {}
         if not params["internal_call"]:
             if params["save_report_to_kbase"]:
