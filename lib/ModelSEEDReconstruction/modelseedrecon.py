@@ -9,7 +9,7 @@ import jinja2
 import pandas as pd
 from optlang.symbolics import Zero, add
 from cobrakbase.core.kbasefba import FBAModel
-from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection
+from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection,MSModelReport
 from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
@@ -162,7 +162,7 @@ class ModelSEEDRecon(BaseModelingModule):
             mdllist.append(mdlutl)
         output = {}
         if params["save_report_to_kbase"]:
-            self.build_dataframe_report(result_table)
+            self.build_dataframe_report(result_table,mdllist)
             output = self.save_report_to_kbase()
         if params["return_data"]:
             output["data"] = result_table.to_json()
@@ -277,13 +277,13 @@ class ModelSEEDRecon(BaseModelingModule):
         output = {}
         if not params["internal_call"]:
             if params["save_report_to_kbase"]:
-                self.build_dataframe_report(result_table)
+                self.build_dataframe_report(result_table,params["model_objs"])
                 output = self.save_report_to_kbase()
             if params["return_data"]:
                 output["data"] = result_table.to_json()
         return output
             
-    def build_dataframe_report(self,table):        
+    def build_dataframe_report(self,table,model_objs=None):        
         context = {
             "initial_model":table.iloc[0]["Model"]
         }
@@ -292,6 +292,10 @@ class ModelSEEDRecon(BaseModelingModule):
             autoescape=jinja2.select_autoescape(['html', 'xml']))
         html = env.get_template("ReportTemplate.html").render(context)
         os.makedirs(self.working_dir+"/html", exist_ok=True)
+        if model_objs:
+            msmodrep = MSModelReport()
+            for model in model_objs:
+                msmodrep.build_report(model,self.working_dir+"/html/"+model.wsid+".html")  
         with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html)
         #Creating data table file
