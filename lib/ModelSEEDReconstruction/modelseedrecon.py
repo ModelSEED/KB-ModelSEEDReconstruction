@@ -47,7 +47,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "run_gapfilling":False,
             "atp_safe":True,
             "forced_atp_list":[],
-            "gapfilling_media_list":[],
+            "gapfilling_media_list":["KBaseMedia/Complete"],
             "suffix":".mdl",
             "core_template":"auto",
             "gs_template":"auto",
@@ -149,7 +149,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "internal_call":True
                 })
             else:
-                self.save_model(mdlutl,params["workspace"],None,params["suffix"])
+                self.save_model(mdlutl,params["workspace"],None)
                 mdlutl.model.objective = "bio1"
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(None)
                 current_output["Growth"] = "Complete:"+str(mdlutl.model.slim_optimize())
