@@ -98,9 +98,11 @@ class ModelSEEDRecon(BaseModelingModule):
                     template_type = "gp"
                 elif current_output["Class"] == "N" or current_output["Class"] == "--":
                     template_type = "gn"
+                elif current_output["Class"] == "A":
+                    template_type = "ar"
                 if template_type not in self.templates:
                     current_output["Comments"] = "Template type "+template_type+" not recognized"
-                    result_table.append(current_output)
+                    result_table = result_table.append(current_output, ignore_index = True)
                     next
                 elif self.templates[template_type] == None:
                     if template_type == "gn":
@@ -143,7 +145,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "default_objective":"bio1",#
                     "output_data":{mdlutl:current_output},#
                     "forced_atp_list":params["forced_atp_list"],
-                    "templates":[curr_template] ,
+                    "templates":[curr_template],
                     "internal_call":True
                 })
             else:
