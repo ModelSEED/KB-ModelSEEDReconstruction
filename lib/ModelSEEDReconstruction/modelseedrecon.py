@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir,working_dir,token,clients,callback)
+        self.version = "0.1.1.msr"
         self.module_dir = module_dir
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
@@ -64,6 +65,9 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_data":False,
             "save_report_to_kbase":True
         })
+        #Making sure default gapfilling media is complete media
+        if not params["gapfilling_media_list"] or len(params["gapfilling_media_list"]) == 0:
+            params["gapfilling_media_list"] = ["KBaseMedia/Complete"]
         #Preloading core and preselected template
         template_type = params["gs_template"]
         if params["gs_template_ref"]:
@@ -172,7 +176,8 @@ class ModelSEEDRecon(BaseModelingModule):
     
     def gapfill_metabolic_models(self,params):
         self.initialize_call("gapfill_metabolic_models",params,True)
-        self.validate_args(params,["media_list","workspace"],{
+        self.validate_args(params,["workspace"],{
+            "media_list":["KBaseMedia/Complete"],
             "model_list":None,
             "model_objectives":[],
             "model_objs":[],
@@ -195,9 +200,13 @@ class ModelSEEDRecon(BaseModelingModule):
             "load_default_atp_medias":True,
             "max_atp_gapfilling":0,
             "gapfilling_delta":0,
+            "return_model_objects":False,
             "return_data":False,
-            "save_report_to_kbase":True
+            "save_report_to_kbase":True,
         })
+        #Making sure default gapfilling media is complete media
+        if not params["media_list"] or len(params["media_list"]) == 0:
+            params["media_list"] = ["KBaseMedia/Complete"]
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
             "Model genes":None,"Reactions":None,"ATP yeilds":None,
@@ -263,13 +272,6 @@ class ModelSEEDRecon(BaseModelingModule):
             current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
             current_output["Reactions"] = mdlutl.nonexchange_reaction_count()
             current_output["Model genes"] = len(mdlutl.model.genes)
-            #current_output["GF reasons"] = ""
-            #mdlutl.gfutl.link_gapfilling_to_biomass()
-            #for item in mdlutl.gfutl.cumulative_gapfilling:
-            #    if len(item) > 2 and len(item[2]) > 0:
-            #        if len(current_output["GF reasons"]) > 0:
-            #            current_output["GF reasons"] += "<br>"
-            #        current_output["GF reasons"] += item[0].id+item[1]+":"+",".join(item[2])
             #Saving completely gapfilled model
             self.save_model(mdlutl,params["workspace"],None,params["suffix"])
             if not params["internal_call"]:
@@ -281,6 +283,8 @@ class ModelSEEDRecon(BaseModelingModule):
                 output = self.save_report_to_kbase()
             if params["return_data"]:
                 output["data"] = result_table.to_json()
+            if params["return_model_objects"]:
+                output["model_objs"] = params["model_objs"]
         return output
             
     def build_dataframe_report(self,table,model_objs=None):        
