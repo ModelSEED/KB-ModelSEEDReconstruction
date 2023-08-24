@@ -14,12 +14,15 @@ from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from kbbasemodules.basemodelingmodule import BaseModelingModule
+from _csv import QUOTE_NONE
 
 logger = logging.getLogger(__name__)
 
 class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir,working_dir,token,clients,callback)
+        self.core_template = None
+        self.gs_template = None
         self.version = "0.1.1.msr"
         self.module_dir = module_dir
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
@@ -70,31 +73,32 @@ class ModelSEEDRecon(BaseModelingModule):
             params["gapfilling_media_list"] = ["KBaseMedia/Complete"]
         #Preloading core and preselected template
         template_type = params["gs_template"]
+        self.gs_template = None
         if params["gs_template_ref"]:
-            self.templates["custom"] = self.get_template(params["gs_template_ref"],None)
-            template_type = "custom"
+            self.gs_template = self.get_template(params["gs_template_ref"],None)
         if params["core_template_ref"]:
-            self.templates["core"] = self.get_template(params["core_template_ref"],None)
+            self.core_template = self.get_template(params["core_template_ref"],None)
+        else:
+            self.core_template = self.get_template(self.templates["core"],None)  
         #Initializing classifier
         genome_classifier = self.get_classifier()
         #Initializing output data tables
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
                           "Model genes":None,"Reactions":None,"ATP yeilds":None,
-                          "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":None}
+                          "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":[]}
         #Retrieving genomes and building models one by one
         mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
             genome = self.get_msgenome(gen_ref)
             #Initializing output row
             current_output = default_output.copy()
-            comments = []
             gid = genome.id
             current_output["Model"] = gid+params["suffix"]
             current_output["Genome"] = genome.info.metadata["Name"]
             current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
             #Pulling annotation priority
-            comments.append("Other annotation priorities not supported by this app yet. Using RAST.")
+            current_output["Comments"].append("Other annotation priorities not supported by this app yet. Using RAST.")
             if template_type == "auto":
                 current_output["Class"] = genome_classifier.classify(genome)
                 print(current_output["Class"])
@@ -104,29 +108,30 @@ class ModelSEEDRecon(BaseModelingModule):
                     template_type = "gn"
                 elif current_output["Class"] == "A":
                     template_type = "ar"
-                if template_type not in self.templates:
-                    current_output["Comments"] = "Template type "+template_type+" not recognized"
+                elif current_output["Class"] == "C":
+                    template_type = "cyano"
+                    current_output["Comments"].append("Cyanobacteria not yet supported. Skipping genome.")
                     result_table = result_table.append(current_output, ignore_index = True)
-                    next
-                elif self.templates[template_type] == None:
-                    if template_type == "gn":
-                        self.templates[template_type] = self.get_template("GramNegModelTemplateV5","NewKBaseModelTemplates")#,templates["core"])
-                    if template_type == "gp":
-                        self.templates[template_type] = self.get_template("GramPosModelTemplateV5","NewKBaseModelTemplates")#,templates["core"])
-            curr_template = self.templates[template_type]
+                    continue
+                else:
+                    current_output["Comments"].append("Unrecognized genome class "+current_output["Class"]+". Skipping genome.")
+                    result_table = result_table.append(current_output, ignore_index = True)
+                    continue
+            if not self.gs_template:
+                self.gs_template = self.get_template(self.templates[template_type],None)
             #Building model            
             base_model = FBAModel({'id':current_output["Model"], 'name':genome.scientific_name})
-            mdl = MSBuilder(genome, curr_template).build(base_model, '0', False, False)
+            mdl = MSBuilder(genome, self.gs_template).build(base_model, '0', False, False)
             mdl.genome = genome
-            mdl.template = curr_template
-            mdl.core_template_ref = str(self.templates["core"].info)
+            mdl.template = self.gs_template
+            mdl.core_template_ref = str(self.core_template.info)
             mdl.genome_ref = str(genome.info)
-            mdl.template_ref = str(curr_template.info)
+            mdl.template_ref = str(self.gs_template.info)
             current_output["ATP yeilds"] = "NA"
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
             if params["atp_safe"]:
-                atpcorrection = MSATPCorrection(mdlutl,self.templates["core"],params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
+                atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
                 current_output["ATP yeilds"] = ""
                 for test in tests:
@@ -149,7 +154,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "default_objective":"bio1",#
                     "output_data":{mdlutl:current_output},#
                     "forced_atp_list":params["forced_atp_list"],
-                    "templates":[curr_template],
+                    "templates":[self.gs_template],
                     "internal_call":True
                 })
             else:
@@ -210,7 +215,7 @@ class ModelSEEDRecon(BaseModelingModule):
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
             "Model genes":None,"Reactions":None,"ATP yeilds":None,
-            "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":None}
+            "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":[]}
         #Retrieving models if not provided already
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
@@ -246,7 +251,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Computing tests for ATP safe gapfilling
             if params["atp_safe"]:
                 if not mdlutl.atputl:
-                    atpcorrection = MSATPCorrection(mdlutl,self.templates["core"],params["atp_medias"],load_default_medias=params["load_default_atp_medias"],max_gapfilling=params["max_atp_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
+                    atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_atp_medias"],max_gapfilling=params["max_atp_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                     tests = atpcorrection.run_atp_correction()
                     additional_tests.extend(tests)
                 else:
@@ -263,8 +268,10 @@ class ModelSEEDRecon(BaseModelingModule):
             growth_array = []
             solutions = msgapfill.run_multi_gapfill(params["media_objs"],default_minimum_objective=params["minimum_objective"])
             for media in params["media_objs"]:
-                if media in solutions:
+                if media in solutions and solutions[media]:
                     msgapfill.integrate_gapfill_solution(solutions[media],mdlutl.gfutl.cumulative_gapfilling)
+                if not solutions[media]:
+                    current_output["Comments"].append("Gapfilling failed for media "+media.id+". Database lacks reactions to grow on media or media is missing essential nutrients.")
                 mdlutl.model.objective = params["model_objectives"][i]
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
                 growth_array.append(media.id+":"+str(mdlutl.model.slim_optimize()))
