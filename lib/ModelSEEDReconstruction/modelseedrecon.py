@@ -190,6 +190,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "suffix":".gf",
             "forced_atp_list":[],
             "templates":None,
+            "core_template_ref":None,
             "source_models":[],
             "limit_medias":[],
             "limit_objectives":[],
@@ -236,6 +237,11 @@ class ModelSEEDRecon(BaseModelingModule):
                 "is_max_threshold":params["is_max_limits"][i],
                 "threshold":params["limit_thresholds"][i]
             })
+        #Getting core template
+        if params["core_template_ref"]:
+            self.core_template = self.get_template(params["core_template_ref"],None)
+        else:
+            self.core_template = self.get_template(self.templates["core"],None)
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
