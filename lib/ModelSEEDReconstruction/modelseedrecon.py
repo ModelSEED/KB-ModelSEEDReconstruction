@@ -312,7 +312,7 @@ class ModelSEEDRecon(BaseModelingModule):
         if model_objs:
             msmodrep = MSModelReport()
             for model in model_objs:
-                msmodrep.build_report(model,self.working_dir+"/html/"+model.wsid+".html")  
+                msmodrep.build_report(model.model,self.working_dir+"/html/"+model.wsid+".html")  
         with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html)
         #Creating data table file
