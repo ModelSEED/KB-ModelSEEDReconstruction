@@ -396,8 +396,8 @@
                     "input_parameter": "default_objective"
                 },
                 {
-                    "target_property": "exclude_reactions",
-                    "input_parameter": "reaction_exlusion_list"
+                    "target_property": "reaction_exlusion_list",
+                    "input_parameter": "exclude_reactions"
                 },
                 {
                     "target_property": "forced_atp_list",
