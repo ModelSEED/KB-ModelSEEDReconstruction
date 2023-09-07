@@ -94,7 +94,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Initializing output row
             current_output = default_output.copy()
             gid = genome.id
-            current_output["Model"] = gid+params["suffix"]
+            current_output["Model"] = gid+params["suffix"]+'<br><a href="../'+str(i+2)+"/"+gid+params["suffix"]+'.html">(see full report)</a>'
             current_output["Genome"] = genome.info.metadata["Name"]
             current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
             #Pulling annotation priority
@@ -103,12 +103,16 @@ class ModelSEEDRecon(BaseModelingModule):
                 current_output["Class"] = genome_classifier.classify(genome)
                 print(current_output["Class"])
                 if current_output["Class"] == "P":
+                    current_output["Class"] = "Gram Positive"
                     template_type = "gp"
                 elif current_output["Class"] == "N" or current_output["Class"] == "--":
+                    current_output["Class"] = "Gram Negative"
                     template_type = "gn"
                 elif current_output["Class"] == "A":
+                    current_output["Class"] = "Archaea"
                     template_type = "ar"
                 elif current_output["Class"] == "C":
+                    current_output["Class"] = "Cyanobacteria"
                     template_type = "cyano"
                     current_output["Comments"].append("Cyanobacteria not yet supported. Skipping genome.")
                     result_table = result_table.append(current_output, ignore_index = True)
@@ -140,6 +144,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     current_output["ATP yeilds"] += test["media"].id+":"+str(test["threshold"])
                 current_output["Core GF"] = len(atpcorrection.cumulative_core_gapfilling)
             #Setting the model ID so the model is saved with the correct name in KBase
+            self.modelutl.get_attributes()["class"] = current_output["Class"]
             mdlutl.wsid = gid+params["suffix"]
             #Running gapfilling
             current_output["GS GF"] = "NA"
@@ -210,9 +215,6 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_data":False,
             "save_report_to_kbase":True,
         })
-        #Making sure default gapfilling media is complete media
-        if not params["media_list"] or len(params["media_list"]) == 0:
-            params["media_list"] = ["KBaseMedia/Complete"]
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
             "Model genes":None,"Reactions":None,"ATP yeilds":None,
@@ -224,7 +226,28 @@ class ModelSEEDRecon(BaseModelingModule):
                 params["model_objs"].append(self.get_model(mdl_ref))
         #Retrieving media objects from references
         params["media_objs"] = []
-        for media_ref in params["media_list"]:
+        first = True
+        #Cleaning out empty or invalid media references
+        original_list = params["media_list"]
+        params["media_list"] = []
+        for media_ref in original_list:
+            if len(media_ref) == 0:
+                if first:
+                    params["media_list"].append("KBaseMedia/Complete")
+                    first = False
+                else:
+                    print("Filtering out empty media reference")
+            elif len(media_ref.split("/")) == 1:
+                params["media_list"].append(str(params["workspace"])+"/"+media_ref)
+            elif len(media_ref.split("/")) <= 3:
+                params["media_list"].append(media_ref)
+            else:
+                print(media_ref+" looks like an invalid workspace reference")
+        #Making sure default gapfilling media is complete media
+        if not params["media_list"] or len(params["media_list"]) == 0:
+            params["media_list"] = ["KBaseMedia/Complete"]            
+        #Retrieving media objects        
+        for media_ref in params["media_list"]:  
             self.input_objects.append(media_ref)
             media = self.get_media(media_ref,None)
             params["media_objs"].append(media)

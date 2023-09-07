@@ -84,20 +84,6 @@
             "advanced": true
         },
         {
-            "id": "automated_atp_evaluation",
-            "field_type": "checkbox",
-            "default_values": [
-                "1"
-            ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
-            },
-            "allow_multiple": false,
-            "optional": false,
-            "advanced": true
-        },
-        {
             "id": "forced_atp_list",
             "field_type": "dropdown",
             "default_values": [

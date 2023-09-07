@@ -65,12 +65,6 @@ parameters :
         placeholder : |
             Check model ATP production
 
-    automated_atp_evaluation :
-        ui-name : |
-            Automated ATP?
-        short-hint : |
-            Check this box to have ModelSEED automatically attempt to determine the ATP production conditions for your genome.
-    
     forced_atp_list :
         ui-name : |
             Media to ensure ATP production

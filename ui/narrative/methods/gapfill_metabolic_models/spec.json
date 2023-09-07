@@ -53,6 +53,21 @@
 			 "optional" : true,
 			 "advanced" : true
 		},{
+			"id" : "exclude_reactions",
+			"field_type" : "dynamic_dropdown",
+			"default_values" : [""],
+			"dynamic_dropdown_options" : {
+                "data_source": "custom",
+                "service_function": "BiochemistryAPI.search_reactions",
+                "service_version": "release",
+                "service_params": [{"query":"{{dynamic_dropdown_input}}"}],
+                "selection_id" : "id",
+                "description_template" : "<strong>{{id}}</strong>: {{name}}"
+            },
+			"allow_multiple" : true,
+			"optional" : true,
+			"advanced" : true
+		},{
             "id": "atp_safe",
             "field_type": "checkbox",
             "default_values": [
@@ -379,6 +394,10 @@
                 {
                     "target_property": "default_objective",
                     "input_parameter": "default_objective"
+                },
+                {
+                    "target_property": "exclude_reactions",
+                    "input_parameter": "reaction_exlusion_list"
                 },
                 {
                     "target_property": "forced_atp_list",
