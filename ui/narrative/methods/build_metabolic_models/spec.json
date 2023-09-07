@@ -448,10 +448,6 @@
                     "input_parameter": "atp_safe"
                 },
                 {
-                    "target_property": "automated_atp_evaluation",
-                    "input_parameter": "automated_atp_evaluation"
-                },
-                {
                     "target_property": "forced_atp_list",
                     "input_parameter": "forced_atp_list"
                 },
