@@ -175,8 +175,8 @@ class ModelSEEDRecon(BaseModelingModule):
             result_table = result_table.append(current_output, ignore_index = True)
             mdllist.append(mdlutl)
         output = {}
+        self.build_dataframe_report(result_table,mdllist)
         if params["save_report_to_kbase"]:
-            self.build_dataframe_report(result_table,mdllist)
             output = self.save_report_to_kbase()
         if params["return_data"]:
             output["data"] = result_table.to_json()
@@ -314,8 +314,8 @@ class ModelSEEDRecon(BaseModelingModule):
                 result_table = result_table.append(current_output, ignore_index = True)
         output = {}
         if not params["internal_call"]:
+            self.build_dataframe_report(result_table,params["model_objs"])
             if params["save_report_to_kbase"]:
-                self.build_dataframe_report(result_table,params["model_objs"])
                 output = self.save_report_to_kbase()
             if params["return_data"]:
                 output["data"] = result_table.to_json()
