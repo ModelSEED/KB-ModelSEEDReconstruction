@@ -37,6 +37,9 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
+    from installed_clients.DataFileUtilClient import DataFileUtil
+    from installed_clients.KBaseReportClient import KBaseReport
+    from installed_clients.WorkspaceClient import Workspace
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -48,7 +51,12 @@ class ModelSEEDReconstruction:
         if "appdev" in self.config["workspace-url"]:
             self.config["ATP_media_workspace"] = "68393" 
         config["version"] = self.VERSION
-        self.msrecon = ModelSEEDRecon(config,"/kb/module",config['scratch'],os.environ['KB_AUTH_TOKEN'],{},os.environ['SDK_CALLBACK_URL'])
+        clients = {
+            "Workspace":Workspace(self.config["workspace-url"], token=os.environ['KB_AUTH_TOKEN']),
+            "KBaseReport":KBaseReport(os.environ['SDK_CALLBACK_URL'],token=os.environ['KB_AUTH_TOKEN']),
+            "DataFileUtil":DataFileUtil(os.environ['SDK_CALLBACK_URL'],token=os.environ['KB_AUTH_TOKEN'])
+        }
+        self.msrecon = ModelSEEDRecon(config,"/kb/module",config['scratch'],os.environ['KB_AUTH_TOKEN'],clients,os.environ['SDK_CALLBACK_URL'])
         #END_CONSTRUCTOR
         pass
 
