@@ -14,7 +14,6 @@ from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from kbbasemodules.basemodelingmodule import BaseModelingModule
-from _csv import QUOTE_NONE
 
 logger = logging.getLogger(__name__)
 
@@ -85,8 +84,8 @@ class ModelSEEDRecon(BaseModelingModule):
         #Initializing output data tables
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
-                          "Model genes":None,"Reactions":None,"ATP yeilds":None,
-                          "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":[]}
+                          "Model genes":None,"Reactions":None,
+                          "Core GF":None,"GS GF":None,"Growth":None,"Comments":[]}
         #Retrieving genomes and building models one by one
         mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
@@ -94,7 +93,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Initializing output row
             current_output = default_output.copy()
             gid = genome.id
-            current_output["Model"] = gid+params["suffix"]+'<br><a href="../'+str(i+2)+"/"+gid+params["suffix"]+'.html">(see full report)</a>'
+            current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html">(see full view)</a>'
             current_output["Genome"] = genome.info.metadata["Name"]
             current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
             #Pulling annotation priority
@@ -124,31 +123,24 @@ class ModelSEEDRecon(BaseModelingModule):
             if not self.gs_template:
                 self.gs_template = self.get_template(self.templates[template_type],None)
             #Building model            
-            base_model = FBAModel({'id':current_output["Model"], 'name':genome.scientific_name})
+            base_model = FBAModel({'id':mdlutl.wsid+params["suffix"], 'name':genome.scientific_name})
             mdl = MSBuilder(genome, self.gs_template).build(base_model, '0', False, False)
             mdl.genome = genome
             mdl.template = self.gs_template
             mdl.core_template_ref = str(self.core_template.info)
             mdl.genome_ref = str(genome.info)
             mdl.template_ref = str(self.gs_template.info)
-            current_output["ATP yeilds"] = "NA"
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
             if params["atp_safe"]:
                 atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
-                current_output["ATP yeilds"] = ""
-                for test in tests:
-                    if len(current_output["ATP yeilds"]) > 0:
-                        current_output["ATP yeilds"] += "; "
-                    current_output["ATP yeilds"] += test["media"].id+":"+str(test["threshold"])
                 current_output["Core GF"] = len(atpcorrection.cumulative_core_gapfilling)
             #Setting the model ID so the model is saved with the correct name in KBase
             mdlutl.get_attributes()["class"] = current_output["Class"]
             mdlutl.wsid = gid+params["suffix"]
             #Running gapfilling
             current_output["GS GF"] = "NA"
-            current_output["Auxotrophy"] = "NA"
             if params["run_gapfilling"]:
                 self.gapfill_metabolic_models({
                     "media_list":params["gapfilling_media_list"],#
@@ -217,8 +209,7 @@ class ModelSEEDRecon(BaseModelingModule):
         })
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
-            "Model genes":None,"Reactions":None,"ATP yeilds":None,
-            "Core GF":None,"GS GF":None,"Auxotrophy":None,"Growth":None,"Comments":[]}
+            "Model genes":None,"Reactions":None,"Core GF":None,"GS GF":None,"Growth":None,"Comments":[]}
         #Retrieving models if not provided already
         if "model_objs" not in params or len(params["model_objs"]) == 0:
             params["model_objs"] = []
@@ -268,7 +259,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
-            current_output["Model"] = mdlutl.wsid+params["suffix"]    
+            current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html">(see full view)</a>'
             if params["output_data"] and mdlutl in params["output_data"]:
                 current_output = params["output_data"][mdlutl]
             #Setting the objective
@@ -335,12 +326,11 @@ class ModelSEEDRecon(BaseModelingModule):
         if model_objs:
             msmodrep = MSModelReport()
             for model in model_objs:
-                msmodrep.build_report(model,self.working_dir+"/html/"+model.wsid+".html")  
+                msmodrep.build_report(model,self.working_dir+"/html/"+model.wsid+"-recon.html")
+                msmodrep.build_multitab_report(model,self.working_dir+"/html/"+model.wsid+"-full.html") 
         with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html)
         #Creating data table file
-        for index, row in table.iterrows():
-            table.at[index,'Model'] = '<a href="javascript:view_annotations('+"'"+row["Model"]+"'"+')">'+row["Model"]+"</a>"
         json_str = '{"data":'+table.to_json(orient='records')+'}'
         with open(self.working_dir+"/html/data.json", 'w') as f:
             f.write(json_str)
