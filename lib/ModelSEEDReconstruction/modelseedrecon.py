@@ -324,10 +324,10 @@ class ModelSEEDRecon(BaseModelingModule):
         html = env.get_template("ReportTemplate.html").render(context)
         os.makedirs(self.working_dir+"/html", exist_ok=True)
         if model_objs:
-            msmodrep = MSModelReport()
             for model in model_objs:
-                msmodrep.build_report(model,self.working_dir+"/html/"+model.wsid+"-recon.html")
-                msmodrep.build_multitab_report(model,self.working_dir+"/html/"+model.wsid+"-full.html") 
+                msmodrep = MSModelReport(model)
+                msmodrep.build_report(self.working_dir+"/html/"+model.wsid+"-recon.html")
+                msmodrep.build_multitab_report(self.working_dir+"/html/"+model.wsid+"-full.html") 
         with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html)
         #Creating data table file
