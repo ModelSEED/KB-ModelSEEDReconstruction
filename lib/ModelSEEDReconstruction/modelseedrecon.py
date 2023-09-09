@@ -93,7 +93,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Initializing output row
             current_output = default_output.copy()
             gid = genome.id
-            current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html">(see full view)</a>'
+            current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html">(see full view)</a>'
             current_output["Genome"] = genome.info.metadata["Name"]
             current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
             #Pulling annotation priority
@@ -123,7 +123,7 @@ class ModelSEEDRecon(BaseModelingModule):
             if not self.gs_template:
                 self.gs_template = self.get_template(self.templates[template_type],None)
             #Building model            
-            base_model = FBAModel({'id':mdlutl.wsid+params["suffix"], 'name':genome.scientific_name})
+            base_model = FBAModel({'id':gid+params["suffix"], 'name':genome.scientific_name})
             mdl = MSBuilder(genome, self.gs_template).build(base_model, '0', False, False)
             mdl.genome = genome
             mdl.template = self.gs_template
