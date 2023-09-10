@@ -93,7 +93,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Initializing output row
             current_output = default_output.copy()
             gid = genome.id
-            current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html">(see full view)</a>'
+            current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
             current_output["Genome"] = genome.info.metadata["Name"]
             current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
             #Pulling annotation priority
