@@ -29,8 +29,7 @@
             "allow_multiple": true,
             "optional": false,
             "advanced": false
-        },
-        {
+        },{
             "id": "suffix",
             "field_type": "text",
             "default_values": [
@@ -39,8 +38,7 @@
             "allow_multiple": false,
             "optional": false,
             "advanced": false
-        },
-        {
+        },{
             "id": "run_gapfilling",
             "field_type": "checkbox",
             "default_values": [
@@ -53,8 +51,7 @@
             "allow_multiple": false,
             "optional": false,
             "advanced": false
-        },
-        {
+        },{
             "id": "gapfilling_media_list",
             "field_type": "text",
             "default_values": [
@@ -68,8 +65,20 @@
             "allow_multiple": true,
             "optional": true,
             "advanced": false
-        },
-        {
+        },{
+            "id": "change_to_complete",
+            "field_type": "checkbox",
+            "default_values": [
+                "0"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
+        },{
             "id": "atp_safe",
             "field_type": "checkbox",
             "default_values": [
@@ -82,8 +91,7 @@
             "allow_multiple": false,
             "optional": false,
             "advanced": true
-        },
-        {
+        },{
             "id": "forced_atp_list",
             "field_type": "dropdown",
             "default_values": [
@@ -317,8 +325,7 @@
             "allow_multiple": true,
             "optional": true,
             "advanced": true
-        },
-        {
+        },{
             "id": "gs_template",
             "field_type": "dropdown",
             "default_values": [
@@ -331,44 +338,37 @@
                         "value": "auto",
                         "display": "Automatic selection",
                         "ui_name": "Automatic selection"
-                    },
-                    {
+                    },{
                         "id": "old_gramneg",
                         "value": "old_gramneg",
                         "display": "Legacy gram negative",
                         "ui_name": "Legacy gram negative"
-                    },
-                    {
+                    },{
                         "id": "old_grampos",
                         "value": "old_grampos",
                         "display": "Legacy gram positive",
                         "ui_name": "Legacy gram positive"
-                    },
-                    {
+                    },{
                         "id": "gramneg",
                         "value": "gramneg",
                         "display": "Gram negative",
                         "ui_name": "Gram negative"
-                    },
-                    {
+                    },{
                         "id": "grampos",
                         "value": "grampos",
                         "display": "Gram positive",
                         "ui_name": "Gram positive"
-                    },
-                    {
+                    },{
                         "id": "archaea",
                         "value": "archaea",
                         "display": "Archaea",
                         "ui_name": "Archaea"
-                    },
-                    {
+                    },{
                         "id": "core",
                         "value": "core",
                         "display": "Core metabolism",
                         "ui_name": "Core metabolism"
-                    },
-                    {
+                    },{
                         "id": "custom",
                         "value": "custom",
                         "display": "Custom (select template)",
@@ -379,8 +379,7 @@
             "allow_multiple": false,
             "optional": true,
             "advanced": true
-        },
-        {
+        },{
             "id": "gs_template_ref",
             "field_type": "text",
             "default_values": [
@@ -394,8 +393,7 @@
             "allow_multiple": false,
             "optional": true,
             "advanced": true
-        },
-        {
+        },{
             "id": "core_template_ref",
             "field_type": "text",
             "default_values": [
@@ -420,47 +418,40 @@
                 {
                     "target_property": "workspace",
                     "narrative_system_variable": "workspace"
-                },
-                {
+                },{
                     "target_property": "genome_refs",
                     "input_parameter": "genome_refs",
                     "target_type_transform": "resolved-ref"
-                },
-                {
+                },{
                     "target_property": "gapfilling_media_list",
                     "input_parameter": "gapfilling_media_list",
                     "target_type_transform": "resolved-ref"
-                },
-                {
+                },{
                     "target_property": "suffix",
                     "input_parameter": "suffix"
-                },
-                {
+                },{
                     "input_parameter": "run_gapfilling",
                     "target_property": "run_gapfilling"
-                },
-                {
+                },{
                     "target_property": "gapfilling_media_list",
                     "input_parameter": "gapfilling_media_list"
-                },
-                {
+                },{
                     "target_property": "atp_safe",
                     "input_parameter": "atp_safe"
-                },
-                {
+                },{
+                    "target_property": "change_to_complete",
+                    "input_parameter": "change_to_complete"
+                },{
                     "target_property": "forced_atp_list",
                     "input_parameter": "forced_atp_list"
-                },
-                {
+                },{
                     "target_property": "gs_template",
                     "input_parameter": "gs_template"
-                },
-                {
+                },{
                     "target_property": "gs_template_ref",
                     "input_parameter": "gs_template_ref",
                     "target_type_transform": "resolved-ref"
-                },
-                {
+                },{
                     "target_property": "core_template_ref",
                     "input_parameter": "core_template_ref",
                     "target_type_transform": "resolved-ref"
@@ -473,15 +464,13 @@
                         "report_name"
                     ],
                     "target_property": "report_name"
-                },
-                {
+                },{
                     "service_method_output_path": [
                         0,
                         "report_ref"
                     ],
                     "target_property": "report_ref"
-                },
-                {
+                },{
                     "narrative_system_variable": "workspace",
                     "target_property": "workspace"
                 }

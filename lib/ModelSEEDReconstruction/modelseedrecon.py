@@ -28,6 +28,7 @@ class ModelSEEDRecon(BaseModelingModule):
                             level=logging.INFO)
         
     def build_metabolic_models(self,params):
+        default_media = "KBaseMedia/AuxoMedia"
         self.initialize_call("build_metabolic_models",params,True)
         if "genomes" in params:
             params["genome_refs"] = params["genomes"]["genome_refs"]
@@ -50,7 +51,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "run_gapfilling":False,
             "atp_safe":True,
             "forced_atp_list":[],
-            "gapfilling_media_list":["KBaseMedia/Complete"],
+            "gapfilling_media_list":None,
             "suffix":".mdl",
             "core_template":"auto",
             "gs_template":"auto",
@@ -65,13 +66,15 @@ class ModelSEEDRecon(BaseModelingModule):
             "gapfilling_delta":0,
             "return_model_objects":False,
             "return_data":False,
-            "save_report_to_kbase":True
+            "save_report_to_kbase":True,
+            "change_to_complete":False
         })
-        #Making sure default gapfilling media is complete media
-        if not params["gapfilling_media_list"] or len(params["gapfilling_media_list"]) == 0:
-            params["gapfilling_media_list"] = ["KBaseMedia/Complete"]
+        if params["change_to_complete"]:
+            default_media = "KBaseMedia/Complete"
+        params["genome_refs"] = self.process_genome_list(params["genome_refs"],params["workspace"])
+        #Processing media
+        params["gapfilling_media_objs"] = self.process_media_list(params["gapfilling_media_list"],default_media,params["workspace"])
         #Preloading core and preselected template
-        template_type = params["gs_template"]
         self.gs_template = None
         if params["gs_template_ref"]:
             self.gs_template = self.get_template(params["gs_template_ref"],None)
@@ -89,6 +92,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Retrieving genomes and building models one by one
         mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
+            template_type = params["gs_template"]
             genome = self.get_msgenome(gen_ref)
             #Initializing output row
             current_output = default_output.copy()
@@ -143,7 +147,7 @@ class ModelSEEDRecon(BaseModelingModule):
             current_output["GS GF"] = "NA"
             if params["run_gapfilling"]:
                 self.gapfill_metabolic_models({
-                    "media_list":params["gapfilling_media_list"],#
+                    "media_objs":params["gapfilling_media_objs"],#
                     "model_objs":[mdlutl],#
                     "atp_safe":params["atp_safe"],#
                     "workspace":params["workspace"],#
@@ -177,9 +181,11 @@ class ModelSEEDRecon(BaseModelingModule):
         return output
     
     def gapfill_metabolic_models(self,params):
+        default_media = "KBaseMedia/AuxoMedia"
         self.initialize_call("gapfill_metabolic_models",params,True)
         self.validate_args(params,["workspace"],{
-            "media_list":["KBaseMedia/Complete"],
+            "media_list":None,
+            "media_objs":None,
             "model_list":None,
             "model_objectives":[],
             "model_objs":[],
@@ -206,7 +212,10 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_model_objects":False,
             "return_data":False,
             "save_report_to_kbase":True,
+            "change_to_complete":False
         })
+        if params["change_to_complete"]:
+            default_media = "KBaseMedia/Complete"
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
             "Model genes":None,"Reactions":None,"Core GF":None,"GS GF":None,"Growth":None,"Comments":[]}
@@ -215,33 +224,9 @@ class ModelSEEDRecon(BaseModelingModule):
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
                 params["model_objs"].append(self.get_model(mdl_ref))
-        #Retrieving media objects from references
-        params["media_objs"] = []
-        first = True
-        #Cleaning out empty or invalid media references
-        original_list = params["media_list"]
-        params["media_list"] = []
-        for media_ref in original_list:
-            if len(media_ref) == 0:
-                if first:
-                    params["media_list"].append("KBaseMedia/Complete")
-                    first = False
-                else:
-                    print("Filtering out empty media reference")
-            elif len(media_ref.split("/")) == 1:
-                params["media_list"].append(str(params["workspace"])+"/"+media_ref)
-            elif len(media_ref.split("/")) <= 3:
-                params["media_list"].append(media_ref)
-            else:
-                print(media_ref+" looks like an invalid workspace reference")
-        #Making sure default gapfilling media is complete media
-        if not params["media_list"] or len(params["media_list"]) == 0:
-            params["media_list"] = ["KBaseMedia/Complete"]            
-        #Retrieving media objects        
-        for media_ref in params["media_list"]:  
-            self.input_objects.append(media_ref)
-            media = self.get_media(media_ref,None)
-            params["media_objs"].append(media)
+        #Processing media
+        if not params["media_objs"]:
+            params["media_objs"] = self.process_media_list(params["media_list"],default_media,params["workspace"])
         #Compiling additional tests
         additional_tests = []
         for i,limit_media in enumerate(params["limit_medias"]):

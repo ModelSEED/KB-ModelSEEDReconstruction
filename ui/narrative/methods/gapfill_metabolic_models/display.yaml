@@ -48,6 +48,12 @@ parameters :
         placeholder : |
             Growth conditions for gapfilling
             
+    change_to_complete :
+        ui-name : |
+            Change default media to Complete
+        short-hint : |
+            Use Complete media instead of AuxoMedia as the default media
+    
     exclude_reactions :
         ui-name : |
             Reactions to exclude from gapfilling
