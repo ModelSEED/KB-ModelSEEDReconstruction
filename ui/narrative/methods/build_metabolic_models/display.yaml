@@ -51,9 +51,9 @@ parameters :
 
     gapfilling_media_list :
         ui-name : |
-            Gapfilling Medias (defaults to complete media)
+            Gapfilling Medias (defaults to AuxoMedia)
         short-hint : |
-            Media specifies the set of chemical compounds the organism can use for its growth. If gapfilling is performed, these medias are used as the growth condition for gapfilling. If no media is specified, complete media is used. The “Complete” media is an abstraction of what’s available in our biochemistry database. Every compound that can be transported into the extracellular compartment–or, in other words, for which a transport reaction is available–is used in the complete media. This list is built in real-time, meaning that whenever you run flux balance analysis (FBA) with complete media, the available transporters are parsed from the media database–and is therefore not stored permanently in any media object in the workspace.
+            Media specifies the set of chemical compounds the organism can use for its growth. If gapfilling is performed, these medias are used as the growth condition for gapfilling. If no media is specified, AuxoMedia is used, which is a media containing glucose plus all amino acids and vitamins.
         placeholder : |
             Growth conditions for gapfilling
 
