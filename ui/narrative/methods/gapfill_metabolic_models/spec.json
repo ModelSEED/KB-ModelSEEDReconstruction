@@ -104,7 +104,7 @@
                 ]
             },
             "allow_multiple": true,
-            "optional": false,
+            "optional": true,
             "advanced": false
         },{
             "id": "change_to_complete",

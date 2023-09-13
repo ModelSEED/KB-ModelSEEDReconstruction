@@ -9,7 +9,7 @@ import jinja2
 import pandas as pd
 from optlang.symbolics import Zero, add
 from cobrakbase.core.kbasefba import FBAModel
-from modelseedpy import MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection,MSModelReport
+from modelseedpy import AnnotationOntology, MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection,MSModelReport
 from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
@@ -129,6 +129,19 @@ class ModelSEEDRecon(BaseModelingModule):
                 self.gs_template = self.get_template(self.templates[template_type],None)
             #Building model            
             base_model = FBAModel({'id':gid+params["suffix"], 'name':genome.scientific_name})
+            #annooutput = self.anno_client().get_annotation_ontology_events({"input_ref":gen_ref})
+            #annoont = AnnotationOntology.from_kbase_data(annooutput,gen_ref,self.module_dir+"/data/")
+            #gene_term_hash = self.anno_client().get_gene_term_hash(None,["SSO"],True,False)
+            #for gene in gene_term_hash:
+            #    for term in gene_term_hash[gene]:
+            #        if term.ontology.id == "SSO":
+            #            name = anno_ont.get_term_name(term)
+            #            f_norm = normalize_role(name)
+            #            if f_norm not in self.search_name_to_genes:
+            #                self.search_name_to_genes[f_norm] = set()
+            #                self.search_name_to_orginal[f_norm] = set()
+            #            self.search_name_to_orginal[f_norm].add(name)
+            #            self.search_name_to_genes[f_norm].add(gene.id)
             mdl = MSBuilder(genome, self.gs_template).build(base_model, '0', False, False)
             mdl.genome = genome
             mdl.template = self.gs_template
@@ -246,7 +259,7 @@ class ModelSEEDRecon(BaseModelingModule):
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
             current_output["Comments"] = []
-            current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html">(see full view)</a>'
+            current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
             if params["output_data"] and mdlutl in params["output_data"]:
                 current_output = params["output_data"][mdlutl]
             #Setting the objective
