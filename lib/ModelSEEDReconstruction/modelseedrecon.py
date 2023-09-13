@@ -96,6 +96,7 @@ class ModelSEEDRecon(BaseModelingModule):
             genome = self.get_msgenome(gen_ref)
             #Initializing output row
             current_output = default_output.copy()
+            current_output["Comments"] = []
             gid = genome.id
             current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
             current_output["Genome"] = genome.info.metadata["Name"]
@@ -244,6 +245,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
+            current_output["Comments"] = []
             current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html">(see full view)</a>'
             if params["output_data"] and mdlutl in params["output_data"]:
                 current_output = params["output_data"][mdlutl]
