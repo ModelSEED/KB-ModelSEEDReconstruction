@@ -89,6 +89,12 @@ parameters :
             Forced ATP media
         short-hint : |
             Forces the model to produce ATP in the specified media
+            
+    gapfilling_mode :
+        ui-name : |
+            Gapfilling type
+        short-hint : |
+            Specifies the gapfilling approach: cumulative means building up a solution as each new condition is gapfilled; independent means keeping every solution independent; global means gapfilling all conditions at once.
 
 icon: modelseed-teal.png
 

@@ -226,7 +226,8 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_model_objects":False,
             "return_data":False,
             "save_report_to_kbase":True,
-            "change_to_complete":False
+            "change_to_complete":False,
+            "gapfilling_mode":"Cumulative"
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -282,19 +283,24 @@ class ModelSEEDRecon(BaseModelingModule):
             if not params["templates"]:
                 params["templates"] = [self.get_template(mdlutl.model.template_ref)]
             msgapfill = MSGapfill(mdlutl,params["templates"],params["source_models"],
-                     additional_tests,blacklist=params["reaction_exlusion_list"],default_target=params["model_objectives"][i],minimum_obj=params["minimum_objective"])
+                additional_tests,blacklist=params["reaction_exlusion_list"],default_target=params["model_objectives"][i],minimum_obj=params["minimum_objective"])
             #Running gapfilling in all conditions
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
-            solutions = msgapfill.run_multi_gapfill(params["media_objs"],default_minimum_objective=params["minimum_objective"])
+            solutions = msgapfill.run_multi_gapfill(
+                params["media_objs"],
+                target=params["model_objectives"][i],
+                default_minimum_objective=params["minimum_objective"],
+                binary_check=False,
+                prefilter=True,
+                check_for_growth=True,
+                gapfilling_mode=params["gapfilling_mode"],
+                run_sensitivity_analysis=True,
+                integrate_solutions=True
+            )
             for media in params["media_objs"]:
-                if media in solutions and solutions[media]:
-                    msgapfill.integrate_gapfill_solution(solutions[media],mdlutl.gfutl.cumulative_gapfilling)
-                if not solutions[media]:
-                    current_output["Comments"].append("Gapfilling failed for media "+media.id+". Database lacks reactions to grow on media or media is missing essential nutrients.")
-                mdlutl.model.objective = params["model_objectives"][i]
-                mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                growth_array.append(media.id+":"+str(mdlutl.model.slim_optimize()))
+                if media.id in solutions and "growth" in solutions[media]:
+                    growth_array.append(media.id+":"+str(solutions[media]["growth"]))
             current_output["Growth"] = "<br>".join(growth_array)
             current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
             current_output["Reactions"] = mdlutl.nonexchange_reaction_count()

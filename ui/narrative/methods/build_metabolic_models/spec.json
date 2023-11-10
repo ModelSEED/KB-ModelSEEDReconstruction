@@ -407,6 +407,32 @@
             "allow_multiple": false,
             "optional": true,
             "advanced": true
+        },{
+            "id": "gapfilling_mode",
+            "field_type": "dropdown",
+            "default_values": [
+                "Cumulative"
+            ],
+            "dropdown_options": {
+                "options": [
+                    {
+                        "id": "Cumulative",
+                        "display": "Cumulative",
+                        "value": "Cumulative"
+                    },{
+                        "id": "Independent",
+                        "display": "Independent",
+                        "value": "Independent"
+                    },{
+                        "id": "Global",
+                        "display": "Global",
+                        "value": "Global"
+                    }
+                ]
+            },
+            "allow_multiple": false,
+            "optional": false,
+            "advanced": true
         }
     ],
     "behavior": {
@@ -455,6 +481,9 @@
                     "target_property": "core_template_ref",
                     "input_parameter": "core_template_ref",
                     "target_type_transform": "resolved-ref"
+                },{
+                    "target_property": "gapfilling_mode",
+                    "input_parameter": "gapfilling_mode"
                 }
             ],
             "output_mapping": [
