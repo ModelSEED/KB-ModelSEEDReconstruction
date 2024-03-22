@@ -13,6 +13,7 @@ from modelseedpy import AnnotationOntology, MSPackageManager,MSGenome, MSMedia, 
 from modelseedpy.helpers import get_template
 from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
+from modelseedpy.core.msgenome import normalize_role
 from kbbasemodules.basemodelingmodule import BaseModelingModule
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,11 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_model_objects":False,
             "return_data":False,
             "save_report_to_kbase":True,
-            "change_to_complete":False
+            "change_to_complete":False,
+            "gapfilling_mode":"Cumulative",
+            "base_media":None,
+            "compound_list":None,
+            "base_media_target_element":"C"
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -93,7 +98,8 @@ class ModelSEEDRecon(BaseModelingModule):
         mdllist = []
         for i,gen_ref in enumerate(params["genome_refs"]):
             template_type = params["gs_template"]
-            genome = self.get_msgenome(gen_ref)
+            #Getting RAST annotated genome, which will be reannotated as needed
+            genome = self.get_msgenome_from_ontology(self,gen_ref,native_python_api=True)
             #Initializing output row
             current_output = default_output.copy()
             current_output["Comments"] = []
@@ -129,20 +135,8 @@ class ModelSEEDRecon(BaseModelingModule):
                 self.gs_template = self.get_template(self.templates[template_type],None)
             #Building model            
             base_model = FBAModel({'id':gid+params["suffix"], 'name':genome.scientific_name})
-            #annooutput = self.anno_client().get_annotation_ontology_events({"input_ref":gen_ref})
-            #annoont = AnnotationOntology.from_kbase_data(annooutput,gen_ref,self.module_dir+"/data/")
-            #gene_term_hash = self.anno_client().get_gene_term_hash(None,["SSO"],True,False)
-            #for gene in gene_term_hash:
-            #    for term in gene_term_hash[gene]:
-            #        if term.ontology.id == "SSO":
-            #            name = anno_ont.get_term_name(term)
-            #            f_norm = normalize_role(name)
-            #            if f_norm not in self.search_name_to_genes:
-            #                self.search_name_to_genes[f_norm] = set()
-            #                self.search_name_to_orginal[f_norm] = set()
-            #            self.search_name_to_orginal[f_norm].add(name)
-            #            self.search_name_to_genes[f_norm].add(gene.id)
-            mdl = MSBuilder(genome, self.gs_template).build(base_model, '0', False, False)
+            builder = MSBuilder(genome, self.gs_template)
+            mdl = builder.build(base_model, '0', False, False)
             mdl.genome = genome
             mdl.template = self.gs_template
             mdl.core_template_ref = str(self.core_template.info)
@@ -170,7 +164,11 @@ class ModelSEEDRecon(BaseModelingModule):
                     "output_data":{mdlutl:current_output},#
                     "forced_atp_list":params["forced_atp_list"],
                     "templates":[self.gs_template],
-                    "internal_call":True
+                    "internal_call":True,
+                    "gapfilling_mode":params["gapfilling_mode"],
+                    "base_media":params["base_media"],
+                    "compound_list":params["compound_list"],
+                    "base_media_target_element":params["base_media_target_element"]
                 })
             else:
                 self.save_model(mdlutl,params["workspace"],None)
@@ -227,9 +225,14 @@ class ModelSEEDRecon(BaseModelingModule):
             "return_data":False,
             "save_report_to_kbase":True,
             "change_to_complete":False,
-            "gapfilling_mode":"Cumulative"
+            "gapfilling_mode":"Cumulative",
+            "base_media":None,
+            "compound_list":None,
+            "base_media_target_element":"C"
         })
+        base_comments = []
         if params["change_to_complete"]:
+            base_comments.append("Changing default to complete.")
             default_media = "KBaseMedia/Complete"
         result_table = pd.DataFrame({})
         default_output = {"Model":None,"Genome":None,"Genes":None,"Class":None,
@@ -242,6 +245,15 @@ class ModelSEEDRecon(BaseModelingModule):
         #Processing media
         if not params["media_objs"]:
             params["media_objs"] = self.process_media_list(params["media_list"],default_media,params["workspace"])
+        #Processing compound list
+        if params["compound_list"]:
+            if not params["base_media"]:
+                base_comments.append("No base media provided. Ignoring compound list.")
+            else:
+                for cpd in params["compound_list"]:
+                    newmedia = MSMedia.from_dict({cpd:100})
+                    newmedia.merge(params["base_media"])
+                    params["media_objs"].append(newmedia)
         #Compiling additional tests
         additional_tests = []
         for i,limit_media in enumerate(params["limit_medias"]):
@@ -259,7 +271,7 @@ class ModelSEEDRecon(BaseModelingModule):
         #Iterating over each model and running gapfilling
         for i,mdlutl in enumerate(params["model_objs"]):
             current_output = default_output.copy()
-            current_output["Comments"] = []
+            current_output["Comments"] = base_comments
             current_output["Model"] = mdlutl.wsid+params["suffix"]+'<br><a href="'+mdlutl.wsid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+mdlutl.wsid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
             if params["output_data"] and mdlutl in params["output_data"]:
                 current_output = params["output_data"][mdlutl]
@@ -271,19 +283,23 @@ class ModelSEEDRecon(BaseModelingModule):
                 params["model_objectives"].append(params["default_objective"])
             #Computing tests for ATP safe gapfilling
             if params["atp_safe"]:
-                if not mdlutl.atputl:
-                    atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_atp_medias"],max_gapfilling=params["max_atp_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
-                    tests = atpcorrection.run_atp_correction()
-                    additional_tests.extend(tests)
-                else:
-                    tests = mdlutl.atputl.build_tests()
-                    additional_tests.extend(tests)
+                tests = mdlutl.get_atp_tests(core_template=self.core_template,atp_media_filename=self.module_dir+"/data/atp_medias.tsv",recompute=False)
+                additional_tests.extend(tests)
             #Creating gapfilling object and configuring solver
             #mdlutl.model.solver = config["solver"]
             if not params["templates"]:
                 params["templates"] = [self.get_template(mdlutl.model.template_ref)]
-            msgapfill = MSGapfill(mdlutl,params["templates"],params["source_models"],
-                additional_tests,blacklist=params["reaction_exlusion_list"],default_target=params["model_objectives"][i],minimum_obj=params["minimum_objective"])
+            msgapfill = MSGapfill(
+                mdlutl,
+                params["templates"],
+                params["source_models"],
+                additional_tests,
+                blacklist=params["reaction_exlusion_list"],
+                default_target=params["model_objectives"][i],
+                minimum_obj=params["minimum_objective"],
+                base_media=params["base_media"],
+                base_media_target_element=params["base_media_target_element"]
+            )
             #Running gapfilling in all conditions
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
