@@ -105,8 +105,8 @@ class ModelSEEDRecon(BaseModelingModule):
             current_output["Comments"] = []
             gid = genome.id
             current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
-            current_output["Genome"] = genome.info.metadata["Name"]
-            current_output["Genes"] = genome.info.metadata["Number of Protein Encoding Genes"]
+            current_output["Genome"] = genome.info[10]["Name"]
+            current_output["Genes"] = genome.info[10]["Number of Protein Encoding Genes"]
             #Pulling annotation priority
             current_output["Comments"].append("Other annotation priorities not supported by this app yet. Using RAST.")
             if template_type == "auto":
@@ -140,7 +140,7 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl.genome = genome
             mdl.template = self.gs_template
             mdl.core_template_ref = str(self.core_template.info)
-            mdl.genome_ref = str(genome.info)
+            mdl.genome_ref = self.wsinfo_to_ref(genome.info)
             mdl.template_ref = str(self.gs_template.info)
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
