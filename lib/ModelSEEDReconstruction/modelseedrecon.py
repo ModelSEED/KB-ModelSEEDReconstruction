@@ -107,7 +107,8 @@ class ModelSEEDRecon(BaseModelingModule):
             current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
             current_output["Genome"] = genome.info[10]["Name"]
             current_output["Genes"] = genome.info[10]["Number of Protein Encoding Genes"]
-            print(genome)
+            for ftr in genome.features:
+                print(ftr.id,ftr.ontology_terms)
             #Pulling annotation priority
             current_output["Comments"].append("Other annotation priorities not supported by this app yet. Using RAST.")
             if template_type == "auto":
