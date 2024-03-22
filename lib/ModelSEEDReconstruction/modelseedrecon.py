@@ -99,7 +99,7 @@ class ModelSEEDRecon(BaseModelingModule):
         for i,gen_ref in enumerate(params["genome_refs"]):
             template_type = params["gs_template"]
             #Getting RAST annotated genome, which will be reannotated as needed
-            genome = self.get_msgenome_from_ontology(gen_ref,native_python_api=True)
+            genome = self.get_msgenome_from_ontology(gen_ref,native_python_api=True,output_ws=params["workspace"])
             #Initializing output row
             current_output = default_output.copy()
             current_output["Comments"] = []
