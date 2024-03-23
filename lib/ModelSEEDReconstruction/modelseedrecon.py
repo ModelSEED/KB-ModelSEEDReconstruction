@@ -25,6 +25,7 @@ class ModelSEEDRecon(BaseModelingModule):
         self.gs_template = None
         self.version = "0.1.1.msr"
         self.module_dir = module_dir
+        self.native_ontology = False
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
         
@@ -100,7 +101,7 @@ class ModelSEEDRecon(BaseModelingModule):
         for i,gen_ref in enumerate(params["genome_refs"]):
             template_type = params["gs_template"]
             #Getting RAST annotated genome, which will be reannotated as needed
-            genome = self.get_msgenome_from_ontology(gen_ref,native_python_api=True,output_ws=params["workspace"])
+            genome = self.get_msgenome_from_ontology(gen_ref,native_python_api=self.native_ontology,output_ws=params["workspace"])
             #Initializing output row
             current_output = default_output.copy()
             current_output["Comments"] = []
@@ -256,7 +257,7 @@ class ModelSEEDRecon(BaseModelingModule):
         if not params["genome_objs"]:
             params["genome_objs"] = {}
             for mdl in params["model_objs"]:
-                params["genome_objs"][mdl] = self.get_msgenome_from_ontology(mdl.genome_ref)
+                params["genome_objs"][mdl] = self.get_msgenome_from_ontology(mdl.genome_ref,native_python_api=self.native_ontology,output_ws=params["workspace"])
         #Retrieving expression data if not provided already
         if not params["expression_objs"] and params["expression_refs"]:
             params["expression_objs"] = self.get_expression_objs(params["expression_refs"],params["genome_objs"])
