@@ -37,9 +37,6 @@ class ModelSEEDReconstruction:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
-    from installed_clients.DataFileUtilClient import DataFileUtil
-    from installed_clients.KBaseReportClient import KBaseReport
-    from installed_clients.WorkspaceClient import Workspace
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't

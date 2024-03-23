@@ -1,4 +1,8 @@
 [ {
+  "module_name" : "cb_annotation_ontology_api",
+  "type" : "sdk",
+  "version_tag" : "dev"
+}, {
   "module_name" : "DataFileUtil",
   "type" : "sdk",
   "version_tag" : "release"
