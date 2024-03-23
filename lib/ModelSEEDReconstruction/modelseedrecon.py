@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
-        BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir,working_dir,token,clients,callback)
+        BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir=module_dir,working_dir=working_dir,token=token,clients=clients,callback=callback)
         self.core_template = None
         self.gs_template = None
         self.version = "0.1.1.msr"
