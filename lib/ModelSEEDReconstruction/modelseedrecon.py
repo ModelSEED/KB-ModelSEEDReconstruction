@@ -72,7 +72,8 @@ class ModelSEEDRecon(BaseModelingModule):
             "gapfilling_mode":"Cumulative",
             "base_media":None,
             "compound_list":None,
-            "base_media_target_element":"C"
+            "base_media_target_element":"C",
+            "expression_refs":None
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -105,8 +106,8 @@ class ModelSEEDRecon(BaseModelingModule):
             current_output["Comments"] = []
             gid = genome.id
             current_output["Model"] = gid+params["suffix"]+'<br><a href="'+gid+params["suffix"]+'-recon.html" target="_blank">(see reconstruction report)</a><br><a href="'+gid+params["suffix"]+'-full.html" target="_blank">(see full view)</a>'
-            current_output["Genome"] = genome.info[10]["Name"]
-            current_output["Genes"] = genome.info[10]["Number of Protein Encoding Genes"]
+            current_output["Genome"] = genome.annoont.info[10]["Name"]
+            current_output["Genes"] = genome.annoont.info[10]["Number of Protein Encoding Genes"]
             for ftr in genome.features:
                 print(ftr.id,ftr.ontology_terms)
             #Pulling annotation priority
@@ -142,10 +143,14 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl.genome = genome
             mdl.template = self.gs_template
             mdl.core_template_ref = str(self.core_template.info)
-            mdl.genome_ref = self.wsinfo_to_ref(genome.info)
+            mdl.genome_ref = self.wsinfo_to_ref(genome.annoont.info)
             mdl.template_ref = str(self.gs_template.info)
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
+            genome_objs = {mdlutl:genome}
+            expression_objs = None
+            if params["expression_refs"]:
+                expression_objs = self.get_expression_objs(params["expression_refs"],params["genome_objs"])
             if params["atp_safe"]:
                 atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
@@ -159,6 +164,8 @@ class ModelSEEDRecon(BaseModelingModule):
                 self.gapfill_metabolic_models({
                     "media_objs":params["gapfilling_media_objs"],#
                     "model_objs":[mdlutl],#
+                    "genome_objs":genome_objs,#
+                    "expression_objs":expression_objs,#
                     "atp_safe":params["atp_safe"],#
                     "workspace":params["workspace"],#
                     "suffix":"",#
@@ -170,7 +177,8 @@ class ModelSEEDRecon(BaseModelingModule):
                     "gapfilling_mode":params["gapfilling_mode"],
                     "base_media":params["base_media"],
                     "compound_list":params["compound_list"],
-                    "base_media_target_element":params["base_media_target_element"]
+                    "base_media_target_element":params["base_media_target_element"],
+                    "reaction_scores":
                 })
             else:
                 self.save_model(mdlutl,params["workspace"],None)
@@ -200,6 +208,9 @@ class ModelSEEDRecon(BaseModelingModule):
         self.validate_args(params,["workspace"],{
             "media_list":None,
             "media_objs":None,
+            "genome_objs":None,
+            "expression_refs":None,
+            "expression_objs":None,
             "model_list":None,
             "model_objectives":[],
             "model_objs":[],
@@ -230,7 +241,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "gapfilling_mode":"Cumulative",
             "base_media":None,
             "compound_list":None,
-            "base_media_target_element":"C"
+            "base_media_target_element":"C",
         })
         base_comments = []
         if params["change_to_complete"]:
@@ -244,6 +255,14 @@ class ModelSEEDRecon(BaseModelingModule):
             params["model_objs"] = []
             for mdl_ref in params["model_list"]:
                 params["model_objs"].append(self.get_model(mdl_ref))
+        #Retrieving genomes if not provided already
+        if not params["genome_objs"]:
+            params["genome_objs"] = {}
+            for mdl in params["model_objs"]:
+                params["genome_objs"][mdl] = self.get_msgenome_from_ontology(mdl.genome_ref)
+        #Retrieving expression data if not provided already
+        if not params["expression_objs"] and params["expression_refs"]:
+            params["expression_objs"] = self.get_expression_objs(params["expression_refs"],params["genome_objs"])
         #Processing media
         if not params["media_objs"]:
             params["media_objs"] = self.process_media_list(params["media_list"],default_media,params["workspace"])
@@ -302,6 +321,11 @@ class ModelSEEDRecon(BaseModelingModule):
                 base_media=params["base_media"],
                 base_media_target_element=params["base_media_target_element"]
             )
+            #Setting reaction scores from genome
+            if params["expression_objs"] and mdlutl in params["expression_objs"] and mdlutl in params["genome_objs"]:
+                msgapfill.reaction_scores = msgapfill.compute_reaction_weights_from_expression_data(params["expression_objs"][mdlutl],params["genome_objs"][mdlutl].annoont)
+            elif mdlutl in params["genome_objs"]:
+                msgapfill.reaction_scores = params["genome_objs"][mdlutl].annoont.get_reaction_gene_hash()
             #Running gapfilling in all conditions
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
