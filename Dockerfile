@@ -33,6 +33,7 @@ RUN pip install cobra
 RUN pip install networkx
 RUN pip install chemw==0.3.2
 RUN pip install deepdiff
+RUN pip install h5py
 
 RUN echo '29' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
 RUN echo '8' >/dev/null && pip install git+https://github.com/cshenry/cobrakbase.git@5c0bfefb569a2540df878fdf995889590412f232
