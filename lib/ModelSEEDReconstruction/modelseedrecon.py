@@ -177,8 +177,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     "gapfilling_mode":params["gapfilling_mode"],
                     "base_media":params["base_media"],
                     "compound_list":params["compound_list"],
-                    "base_media_target_element":params["base_media_target_element"],
-                    "reaction_scores":
+                    "base_media_target_element":params["base_media_target_element"]
                 })
             else:
                 self.save_model(mdlutl,params["workspace"],None)
