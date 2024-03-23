@@ -373,6 +373,7 @@ class ModelSEEDRecon(BaseModelingModule):
                 msmodrep = MSModelReport(model)
                 msmodrep.build_report(self.working_dir+"/html/"+model.wsid+"-recon.html")
                 msmodrep.build_multitab_report(self.working_dir+"/html/"+model.wsid+"-full.html") 
+        print("Output dir:",self.working_dir+"/html/index.html")
         with open(self.working_dir+"/html/index.html", 'w') as f:
             f.write(html)
         #Creating data table file
