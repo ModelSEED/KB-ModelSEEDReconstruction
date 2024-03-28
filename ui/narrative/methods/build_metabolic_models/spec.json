@@ -433,7 +433,33 @@
             "allow_multiple": false,
             "optional": false,
             "advanced": true
-        }
+        },{
+         "text_options" : {
+            "valid_ws_types" : [
+               "KBaseFeatureValues.ExpressionMatrix"
+            ]
+         },
+         "default_values" : [
+            ""
+         ],
+         "id" : "expression_refs",
+         "advanced" : true,
+         "allow_multiple" : true,
+         "optional" : true,
+         "field_type" : "text"
+      },{
+         "default_values" : [
+            ""
+         ],
+         "advanced" : true,
+         "id" : "expression_conditions",
+         "field_type" : "text",
+         "allow_multiple" : true,
+         "optional" : true,
+         "text_options" : {
+            "valid_ws_types" : []
+         }
+      }
     ],
     "behavior": {
         "service-mapping": {
@@ -470,6 +496,12 @@
                 },{
                     "target_property": "forced_atp_list",
                     "input_parameter": "forced_atp_list"
+                },{
+                    "target_property": "expression_refs",
+                    "input_parameter": "expression_refs"
+                },{
+                    "target_property": "expression_conditions",
+                    "input_parameter": "expression_conditions"
                 },{
                     "target_property": "gs_template",
                     "input_parameter": "gs_template"

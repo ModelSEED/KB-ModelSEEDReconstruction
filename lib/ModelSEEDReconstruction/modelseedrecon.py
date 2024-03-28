@@ -74,7 +74,10 @@ class ModelSEEDRecon(BaseModelingModule):
             "base_media":None,
             "compound_list":None,
             "base_media_target_element":"C",
-            "expression_refs":None
+            "expression_refs":None,
+            "extend_model_with_ontology":False,
+            "ontology_events":None,
+            "save_models_to_kbase":True,
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -138,7 +141,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Building model            
             base_model = FBAModel({'id':gid+params["suffix"], 'name':genome.scientific_name})
             builder = MSBuilder(genome, self.gs_template)
-            mdl = builder.build(base_model, '0', False, False)
+            mdl = builder.build(base_model, '0', False, False)            
             mdl.genome = genome
             mdl.template = self.gs_template
             mdl.core_template_ref = str(self.core_template.info)
@@ -146,6 +149,8 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl.template_ref = str(self.gs_template.info)
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
+            if params["extend_model_with_ontology"]:
+                self.extend_model_with_other_ontologies(mdlutl,genome.anno_ont,builder,prioritized_event_list=params["ontology_events"])
             genome_objs = {mdlutl:genome}
             expression_objs = None
             if params["expression_refs"]:
@@ -176,10 +181,12 @@ class ModelSEEDRecon(BaseModelingModule):
                     "gapfilling_mode":params["gapfilling_mode"],
                     "base_media":params["base_media"],
                     "compound_list":params["compound_list"],
-                    "base_media_target_element":params["base_media_target_element"]
+                    "base_media_target_element":params["base_media_target_element"],
+                    "save_models_to_kbase":params["save_models_to_kbase"]
                 })
             else:
-                self.save_model(mdlutl,params["workspace"],None)
+                if params["save_models_to_kbase"]:
+                    self.save_model(mdlutl,params["workspace"],None)
                 mdlutl.model.objective = "bio1"
                 mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(None)
                 current_output["Growth"] = "Complete:"+str(mdlutl.model.slim_optimize())
@@ -240,6 +247,8 @@ class ModelSEEDRecon(BaseModelingModule):
             "base_media":None,
             "compound_list":None,
             "base_media_target_element":"C",
+            "save_models_to_kbase":True,
+            "save_gapfilling_fba_to_kbase":True
         })
         base_comments = []
         if params["change_to_complete"]:
@@ -338,15 +347,33 @@ class ModelSEEDRecon(BaseModelingModule):
                 run_sensitivity_analysis=True,
                 integrate_solutions=True
             )
+            output_solution = None
+            output_solution_media = None
             for media in params["media_objs"]:
                 if media.id in solutions and "growth" in solutions[media]:
                     growth_array.append(media.id+":"+str(solutions[media]["growth"]))
+                    if solutions[media]["growth"] > 0 and output_solution == None:
+                        mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+                        output_solution = mdlutl.model.optimize()
+                        output_solution_media = media
+            solution_rxn_types = ["new","reversed"]
+            if output_solution and output_solution_media in solutions:
+                gfsolution = solutions[output_solution_media]
+                for rxn_type in solution_rxn_types:
+                    for rxn_id in gfsolution[rxn_type]:
+                        if gfsolution[rxn_type] == ">":
+                            output_solution.fluxes[rxn_id] = 1000
+                        else:
+                            output_solution.fluxes[rxn_id] = -1000
             current_output["Growth"] = "<br>".join(growth_array)
             current_output["GS GF"] = len(mdlutl.gfutl.cumulative_gapfilling)
             current_output["Reactions"] = mdlutl.nonexchange_reaction_count()
             current_output["Model genes"] = len(mdlutl.model.genes)
             #Saving completely gapfilled model
-            self.save_model(mdlutl,params["workspace"],None,params["suffix"])
+            if params["save_models_to_kbase"]:
+                self.save_model(mdlutl,params["workspace"],None,params["suffix"])
+            if params["save_gapfilling_fba_to_kbase"] and output_solution:
+                self.save_solution_as_fba(output_solution,mdlutl,output_solution_media,workspace=params["workspace"],suffix=".gffba")
             if not params["internal_call"]:
                 result_table = result_table.append(current_output, ignore_index = True)
         output = {}

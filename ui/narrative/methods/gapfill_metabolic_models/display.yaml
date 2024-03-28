@@ -96,6 +96,18 @@ parameters :
         short-hint : |
             Specifies the gapfilling approach: cumulative means building up a solution as each new condition is gapfilled; independent means keeping every solution independent; global means gapfilling all conditions at once.
 
+    expression_refs :
+        ui-name : |
+            Expression datasets
+        short-hint : |
+            Feature value matrices to be used in OMEGGA method to aid in selecting gene candidates for gapfilled reactions
+
+    expression_conditions :
+        ui-name : |
+            Expression conditions
+        short-hint : |
+            Optional list of columns within the expression dataset to use with OMEGGA method. If no conditions are specified within an expression dataset, all the columnns will be used.
+
 icon: modelseed-teal.png
 
 description : |
