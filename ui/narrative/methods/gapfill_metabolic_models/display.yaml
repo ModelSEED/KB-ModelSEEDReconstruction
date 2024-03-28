@@ -1,7 +1,7 @@
 #
 # Define basic display information
 #
-name     : MS2 - Improved Gapfill Metabolic Models
+name     : MS2 - Improved Gapfill Metabolic Models with OMEGGA
 tooltip  : |
     Identify the minimal set of biochemical reactions to add to draft metabolic models to enable them to produce a desired flux in a specified media.
 

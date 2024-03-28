@@ -369,14 +369,14 @@
             "id": "gapfilling_mode",
             "field_type": "dropdown",
             "default_values": [
-                "Cumulative"
+                "Sequential"
             ],
             "dropdown_options": {
                 "options": [
                     {
-                        "id": "Cumulative",
-                        "display": "Cumulative",
-                        "value": "Cumulative"
+                        "id": "Sequential",
+                        "display": "Sequential",
+                        "value": "Sequential"
                     },{
                         "id": "Independent",
                         "display": "Independent",

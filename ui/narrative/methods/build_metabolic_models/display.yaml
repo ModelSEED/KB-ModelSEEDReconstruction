@@ -1,7 +1,7 @@
 #
 # Define basic display information
 #
-name     : MS2 - Build Prokaryotic Metabolic Models
+name     : MS2 - Build Prokaryotic Metabolic Models with OMEGGA
 
 tooltip  : |
     Using ModelSEED2 pipeline, construct draft metabolic models based on input annotated genomes.
