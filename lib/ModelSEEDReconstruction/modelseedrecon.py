@@ -335,14 +335,16 @@ class ModelSEEDRecon(BaseModelingModule):
             )
             #Setting reaction scores from genome
             msgapfill.reaction_scores = params["genome_objs"][mdlutl].annoont.get_reaction_gene_hash(feature_type="gene")
-            self.util.save("original_scores",msgapfill.reaction_scores)
+            if self.util:
+                self.util.save("original_scores",msgapfill.reaction_scores)
             if params["expression_objs"] and mdlutl in params["expression_objs"] and mdlutl in params["genome_objs"]:
                 expression_scores = msgapfill.compute_reaction_weights_from_expression_data(params["expression_objs"][mdlutl],params["genome_objs"][mdlutl].annoont)
                 for rxn_id in msgapfill.reaction_scores:
                     for gene in msgapfill.reaction_scores[rxn_id]:
                         if gene in expression_scores:
                             msgapfill.reaction_scores[rxn_id][gene]["probability"] = expression_scores[gene]+0.5
-                self.util.save("expression_scores",msgapfill.reaction_scores)   
+                if self.util:
+                    self.util.save("expression_scores",msgapfill.reaction_scores)   
             #Running gapfilling in all conditions
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
@@ -525,14 +527,9 @@ class ModelSEEDRecon(BaseModelingModule):
         fba_obj = self.save_solution_as_fba(solution,mdlutl,media,params["fba_output_id"],workspace=params["workspace"],fbamodel_ref=params("fbamodel_id"))
         
         #Saving the output
-        self.build_dataframe_report(result_table,params["model_objs"])
         if params["save_report_to_kbase"]:
             output = self.save_report_to_kbase()
-        if bool(params["return_data"]):
-            output["exchange"] = exchange_table.to_json()
-            output["flux"] = flux_table.to_json()
-            output["interactions"] = interactions_table.to_json()
-        if bool(params["return_model_objects"]):
+        if bool(params["return_fba_object"]):
             output["fba_obj"] = fba_obj
         return output
 
