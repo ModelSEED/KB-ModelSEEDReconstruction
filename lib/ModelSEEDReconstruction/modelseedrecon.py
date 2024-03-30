@@ -8,6 +8,7 @@ import json
 import jinja2
 import pandas as pd
 from optlang.symbolics import Zero, add
+import cobra
 from cobrakbase.core.kbasefba import FBAModel
 from modelseedpy import AnnotationOntology, MSPackageManager,MSGenome, MSMedia, MSModelUtil, MSBuilder, MSGapfill, FBAHelper, MSGrowthPhenotypes, MSModelUtil, MSATPCorrection,MSModelReport
 from modelseedpy.helpers import get_template
@@ -15,6 +16,7 @@ from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msgenome import normalize_role
 from kbbasemodules.basemodelingmodule import BaseModelingModule
+from modelseedpy.community.mscommunity import MSCommunity
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,7 @@ class ModelSEEDRecon(BaseModelingModule):
     def __init__(self,config,module_dir="/kb/module",working_dir=None,token=None,clients={},callback=None):
         BaseModelingModule.__init__(self,"ModelSEEDReconstruction",config,module_dir=module_dir,working_dir=working_dir,token=token,clients=clients,callback=callback)
         self.core_template = None
+        self.util = None
         self.gs_template = None
         self.version = "0.1.1.msr"
         self.module_dir = module_dir
@@ -78,6 +81,7 @@ class ModelSEEDRecon(BaseModelingModule):
             "extend_model_with_ontology":False,
             "ontology_events":None,
             "save_models_to_kbase":True,
+            "save_gapfilling_fba_to_kbase":True
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -154,7 +158,7 @@ class ModelSEEDRecon(BaseModelingModule):
             genome_objs = {mdlutl:genome}
             expression_objs = None
             if params["expression_refs"]:
-                expression_objs = self.get_expression_objs(params["expression_refs"],params["genome_objs"])
+                expression_objs = self.get_expression_objs(params["expression_refs"],genome_objs)
             if params["atp_safe"]:
                 atpcorrection = MSATPCorrection(mdlutl,self.core_template,params["atp_medias"],load_default_medias=params["load_default_medias"],max_gapfilling=params["max_gapfilling"],gapfilling_delta=params["gapfilling_delta"],forced_media=params["forced_atp_list"],default_media_path=self.module_dir+"/data/atp_medias.tsv")
                 tests = atpcorrection.run_atp_correction()
@@ -182,7 +186,8 @@ class ModelSEEDRecon(BaseModelingModule):
                     "base_media":params["base_media"],
                     "compound_list":params["compound_list"],
                     "base_media_target_element":params["base_media_target_element"],
-                    "save_models_to_kbase":params["save_models_to_kbase"]
+                    "save_models_to_kbase":params["save_models_to_kbase"],
+                    "save_gapfilling_fba_to_kbase":params["save_gapfilling_fba_to_kbase"]
                 })
             else:
                 if params["save_models_to_kbase"]:
@@ -266,7 +271,7 @@ class ModelSEEDRecon(BaseModelingModule):
         if not params["genome_objs"]:
             params["genome_objs"] = {}
             for mdl in params["model_objs"]:
-                params["genome_objs"][mdl] = self.get_msgenome_from_ontology(mdl.genome_ref,native_python_api=self.native_ontology,output_ws=params["workspace"])
+                params["genome_objs"][mdl] = self.get_msgenome_from_ontology(mdl.model.genome_ref,native_python_api=self.native_ontology,output_ws=params["workspace"])
         #Retrieving expression data if not provided already
         if not params["expression_objs"] and params["expression_refs"]:
             params["expression_objs"] = self.get_expression_objs(params["expression_refs"],params["genome_objs"])
@@ -329,10 +334,15 @@ class ModelSEEDRecon(BaseModelingModule):
                 base_media_target_element=params["base_media_target_element"]
             )
             #Setting reaction scores from genome
+            msgapfill.reaction_scores = params["genome_objs"][mdlutl].annoont.get_reaction_gene_hash(feature_type="gene")
+            self.util.save("original_scores",msgapfill.reaction_scores)
             if params["expression_objs"] and mdlutl in params["expression_objs"] and mdlutl in params["genome_objs"]:
-                msgapfill.reaction_scores = msgapfill.compute_reaction_weights_from_expression_data(params["expression_objs"][mdlutl],params["genome_objs"][mdlutl].annoont)
-            elif mdlutl in params["genome_objs"]:
-                msgapfill.reaction_scores = params["genome_objs"][mdlutl].annoont.get_reaction_gene_hash()
+                expression_scores = msgapfill.compute_reaction_weights_from_expression_data(params["expression_objs"][mdlutl],params["genome_objs"][mdlutl].annoont)
+                for rxn_id in msgapfill.reaction_scores:
+                    for gene in msgapfill.reaction_scores[rxn_id]:
+                        if gene in expression_scores:
+                            msgapfill.reaction_scores[rxn_id][gene]["probability"] = expression_scores[gene]+0.5
+                self.util.save("expression_scores",msgapfill.reaction_scores)   
             #Running gapfilling in all conditions
             mdlutl.gfutl.cumulative_gapfilling = []
             growth_array = []
@@ -350,18 +360,19 @@ class ModelSEEDRecon(BaseModelingModule):
             output_solution = None
             output_solution_media = None
             for media in params["media_objs"]:
-                if media.id in solutions and "growth" in solutions[media]:
+                if media in solutions and "growth" in solutions[media]:
                     growth_array.append(media.id+":"+str(solutions[media]["growth"]))
                     if solutions[media]["growth"] > 0 and output_solution == None:
                         mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
-                        output_solution = mdlutl.model.optimize()
+                        mdlutl.pkgmgr.getpkg("ElementUptakePkg").build_package({"C": 60})
+                        output_solution = cobra.flux_analysis.pfba(mdlutl.model)
                         output_solution_media = media
             solution_rxn_types = ["new","reversed"]
             if output_solution and output_solution_media in solutions:
                 gfsolution = solutions[output_solution_media]
                 for rxn_type in solution_rxn_types:
                     for rxn_id in gfsolution[rxn_type]:
-                        if gfsolution[rxn_type] == ">":
+                        if gfsolution[rxn_type][rxn_id] == ">":
                             output_solution.fluxes[rxn_id] = 1000
                         else:
                             output_solution.fluxes[rxn_id] = -1000
@@ -373,9 +384,9 @@ class ModelSEEDRecon(BaseModelingModule):
             if params["save_models_to_kbase"]:
                 self.save_model(mdlutl,params["workspace"],None,params["suffix"])
             if params["save_gapfilling_fba_to_kbase"] and output_solution:
-                self.save_solution_as_fba(output_solution,mdlutl,output_solution_media,workspace=params["workspace"],suffix=".gffba")
+                self.save_solution_as_fba(output_solution,mdlutl,output_solution_media,mdlutl.wsid+".fba",workspace=params["workspace"],fbamodel_ref=str(params["workspace"])+"/"+mdlutl.wsid)
             if not params["internal_call"]:
-                result_table = result_table.append(current_output, ignore_index = True)
+                result_table = result_table.append(current_output, ignore_index = True) 
         output = {}
         if not params["internal_call"]:
             self.build_dataframe_report(result_table,params["model_objs"])
@@ -386,7 +397,145 @@ class ModelSEEDRecon(BaseModelingModule):
             if params["return_model_objects"]:
                 output["model_objs"] = params["model_objs"]
         return output
-            
+
+    def run_community_fba(self,params):
+        self.initialize_call("gapfill_metabolic_models",params,True)
+        self.validate_args(params,["workspace","fbamodel_id","fba_output_id"],{
+            "media_id":"KBaseMedia/AuxoMedia",
+            "target_reaction":"bio1",
+            "expression_ref":None,
+            "expression_condition":None,
+            "feature_ko_list":[],
+		    "reaction_ko_list":[],
+            "prfba":True,
+            "objective_fraction":0.9,
+            "expression_coef":-10,
+            "min_probability":0.05,
+            "kinetics_coef":400,
+            "exchange_coef":1,
+            "max_c_uptake":None,
+            "max_n_uptake":None,
+            "max_p_uptake":None,
+            "max_s_uptake":None,
+            "max_o_uptake":None,
+            "predict_community_composition":False,
+            "return_fba_object":False,
+            "return_data":False,
+            "save_report_to_kbase":True,
+            "save_fba_to_kbase":True
+        })
+        #Getting model
+        mdlutl = self.get_model(params["fbamodel_id"])
+        #Setting objective
+        mdlutl.model.objective = params["target_reaction"]
+        #Setting media
+        media = self.get_media(params["media_id"],None)
+        mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
+        #Setting elemental uptake constraint
+        elemental_hash = {}
+        if params["max_c_uptake"]:
+            elemental_hash["C"] = params["max_c_uptake"]
+        if params["max_n_uptake"]:
+            elemental_hash["N"] = params["max_n_uptake"]
+        if params["max_p_uptake"]:
+            elemental_hash["P"] = params["max_p_uptake"]
+        if params["max_s_uptake"]:
+            elemental_hash["S"] = params["max_s_uptake"]
+        if params["max_o_uptake"]:
+            elemental_hash["O"] = params["max_o_uptake"]
+        if len(elemental_hash) > 0:
+            mdlutl.pkgmgr.getpkg("ElementUptakePkg").build_package(elemental_hash)
+        #Adding commkinetic constraints
+        species_list = []
+        abundance_hash = {}
+        comm_model = MSCommunity(
+            model=mdlutl,
+            names=species_list
+        )
+        comm_model.set_abundance(abundance_hash)
+        mdlutl.pkgmgr.getpkg("CommKineticPkg").build_package(float(params["kinetics_coef"]), comm_model)
+        output = {}
+        #Optimizing and constraining objective to fraction of optimum
+        output["max_growth"] = mdlutl.model.slim_optimize()
+        if "C" in elemental_hash:
+            output["carbon_uptake"] = mdlutl.getpkg("ElementUptakePkg").variables["elements"]["C"].primal
+        if str(output["max_growth"]) != "nan":
+            return output
+        mdlutl.pkgmgr.getpkg("ObjConstPkg").build_package(output["max_growth"] * float(params["objective_fraction"]), None)
+        #Creating minimal probability objective
+        coef = {}
+        for rxn in comm_model.model.reactions:
+            if "rxn" == rxn.id[0:3]:
+                currrxn = comm_model.model.reactions.get_by_id(rxn.id)
+                if bool(params["prfba"]):
+                    coef.update(
+                        {
+                            currrxn.forward_variable: max(
+                                float(params["min_probability"]), (1 - float(rxn.probability))
+                            )
+                        }
+                    )
+                    coef.update(
+                        {
+                            currrxn.reverse_variable: max(
+                                float(params["min_probability"]), (1 - float(rxn.probability))
+                            )
+                        }
+                    )
+                else:
+                    coef.update({currrxn.forward_variable: 1})
+                    coef.update({currrxn.reverse_variable: 1})
+            elif "EX_" == rxn.id[0:3]:
+                currrxn = current_comm_model.model.reactions.get_by_id(rxn.id)
+                coef.update({currrxn.forward_variable: float(params["exchange_coef"])})
+                coef.update({currrxn.reverse_variable: float(params["exchange_coef"])})
+        #Adding expression data to minimum probability objective
+        """
+        for clade in feature_entries:
+            total = 0
+            for ftr in feature_entries[clade]:
+                total += feature_entries[clade][ftr][condition]
+            for ftr in feature_entries[clade]:
+                feature_entries[clade][ftr][condition] = feature_entries[clade][ftr][condition]/total
+        for rxn in mdlutl.model.reactions:
+            highest_exp = 0
+            for gene in rxn.genes:
+                array = gene.id.split("_")
+                array.pop()
+                clade = "_".join(array)
+                if gene.id in feature_entries[clade] and condition in feature_entries[clade][gene.id]:
+                    if feature_entries[clade][gene.id][condition] > highest_exp:
+                        highest_exp = feature_entries[clade][gene.id][condition]
+            if highest_exp > min_expression: 
+                coef.update(
+                    {
+                        rxn.forward_variable: float(params["expression_coef"]) * highest_exp
+                    }
+                )
+                coef.update(
+                    {
+                        rxn.reverse_variable: float(params["expression_coef"]) * highest_exp
+                    }
+                )"""
+        #Setting the objective
+        mdlutl.model.objective = mdlutl.model.problem.Objective(Zero, direction="min")
+        mdlutl.model.objective.set_linear_coefficients(coef)    
+        #Solving the LP
+        solution = mdlutl.model.optimize()
+        fba_obj = self.save_solution_as_fba(solution,mdlutl,media,params["fba_output_id"],workspace=params["workspace"],fbamodel_ref=params("fbamodel_id"))
+        
+        #Saving the output
+        self.build_dataframe_report(result_table,params["model_objs"])
+        if params["save_report_to_kbase"]:
+            output = self.save_report_to_kbase()
+        if bool(params["return_data"]):
+            output["exchange"] = exchange_table.to_json()
+            output["flux"] = flux_table.to_json()
+            output["interactions"] = interactions_table.to_json()
+        if bool(params["return_model_objects"]):
+            output["fba_obj"] = fba_obj
+        return output
+
     def build_dataframe_report(self,table,model_objs=None):        
         context = {
             "initial_model":table.iloc[0]["Model"]
