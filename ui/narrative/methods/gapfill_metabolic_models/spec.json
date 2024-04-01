@@ -454,7 +454,8 @@
                     "input_parameter": "minimum_objective"
                 },{
                     "target_property": "expression_refs",
-                    "input_parameter": "expression_refs"
+                    "input_parameter": "expression_refs",
+                    "target_type_transform": "resolved-ref"
                 },{
                     "target_property": "expression_conditions",
                     "input_parameter": "expression_conditions"
