@@ -434,17 +434,23 @@ class ModelSEEDRecon(BaseModelingModule):
         media = self.get_media(params["media_id"],None)
         mdlutl.pkgmgr.getpkg("KBaseMediaPkg").build_package(media)
         #Setting elemental uptake constraint
+        exchange_string = "None"
         elemental_hash = {}
         if params["max_c_uptake"]:
             elemental_hash["C"] = params["max_c_uptake"]
+            exchange_string += "C: "+str(params["max_c_uptake"])+"; "
         if params["max_n_uptake"]:
             elemental_hash["N"] = params["max_n_uptake"]
+            exchange_string += "N: "+str(params["max_n_uptake"])+"; "
         if params["max_p_uptake"]:
             elemental_hash["P"] = params["max_p_uptake"]
+            exchange_string += "P: "+str(params["max_p_uptake"])+"; "
         if params["max_s_uptake"]:
             elemental_hash["S"] = params["max_s_uptake"]
+            exchange_string += "S: "+str(params["max_s_uptake"])+"; "
         if params["max_o_uptake"]:
             elemental_hash["O"] = params["max_o_uptake"]
+            exchange_string += "O: "+str(params["max_o_uptake"])+"; "
         if len(elemental_hash) > 0:
             mdlutl.pkgmgr.getpkg("ElementUptakePkg").build_package(elemental_hash)
         #Adding commkinetic constraints
@@ -488,7 +494,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     coef.update({currrxn.forward_variable: 1})
                     coef.update({currrxn.reverse_variable: 1})
             elif "EX_" == rxn.id[0:3]:
-                currrxn = current_comm_model.model.reactions.get_by_id(rxn.id)
+                currrxn = comm_model.model.reactions.get_by_id(rxn.id)
                 coef.update({currrxn.forward_variable: float(params["exchange_coef"])})
                 coef.update({currrxn.reverse_variable: float(params["exchange_coef"])})
         #Adding expression data to minimum probability objective
@@ -525,7 +531,30 @@ class ModelSEEDRecon(BaseModelingModule):
         #Solving the LP
         solution = mdlutl.model.optimize()
         fba_obj = self.save_solution_as_fba(solution,mdlutl,media,params["fba_output_id"],workspace=params["workspace"],fbamodel_ref=params("fbamodel_id"))
-        
+        context = {
+            "overview": {
+                'Model ID':mdlutl.wsid,
+                'Media ID':media.id,
+                'Target reaction':params["target_reaction"],
+                'Gene knockouts':"; ".join(params["feature_ko_list"]),
+                'Reaction knockouts':"; ".join(params["reaction_ko_list"]),
+                'Exchange limits':exchange_string,
+                'Kinetics coefficient':params["kinetics_coef"],
+                'Objective fraction':params["objective_fraction"],
+                'prFBA':params["prfba"],
+                'Max growth':fba_obj.objective_value
+            },
+            "reactions": [],
+            "exchange": [],
+            "interaction": []
+        }
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(self.module_dir+"/data/"),
+            autoescape=jinja2.select_autoescape(['html', 'xml']))
+        html = env.get_template("FBAReportTemplate.html").render(context)
+        os.makedirs(self.working_dir+"/html", exist_ok=True)
+        with open(self.working_dir+"/html/index.html", 'w') as f:
+            f.write(html)
         #Saving the output
         if params["save_report_to_kbase"]:
             output = self.save_report_to_kbase()
