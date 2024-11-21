@@ -11,6 +11,7 @@ MAINTAINER chenry@anl.gov
 
 RUN pip install --upgrade pip
 RUN pip install chemw==0.3.2
+RUN pip install pandas
 
 # update security libraries in the base image
 RUN pip install cffi --upgrade \
@@ -36,9 +37,10 @@ RUN pip install deepdiff
 RUN pip install h5py
 
 RUN echo '33' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
-RUN echo '11' >/dev/null && pip install git+https://github.com/cshenry/cobrakbase.git@f0b3aa300fb153fc83b2fd5e83be231fc6992fae
+#RUN echo '11' >/dev/null && pip install git+https://github.com/cshenry/cobrakbase.git@f0b3aa300fb153fc83b2fd5e83be231fc6992fae
 
 RUN echo '30' >/dev/null && mkdir deps && cd deps && \
+    git clone https://github.com/cshenry/cobrakbase.git@f0b3aa300fb153fc83b2fd5e83be231fc6992fae
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
 RUN mkdir test
 
