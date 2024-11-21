@@ -41,7 +41,7 @@ RUN echo '33' >/dev/null && pip install --use-deprecated=legacy-resolver git+htt
 
 RUN echo '30' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
-RUN echo '1' >/dev/null && mkdir deps && cd deps && \
+RUN echo '1' >/dev/null && cd deps && \
     git clone https://github.com/cshenry/cobrakbase.git && \
     cd cobrakbase && git checkout f0b3aa300fb153fc83b2fd5e83be231fc6992fae
 RUN mkdir test
