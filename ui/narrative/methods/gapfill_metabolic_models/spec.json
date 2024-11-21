@@ -320,6 +320,11 @@
                         "ui_name": "Pyruvate TMAO",
                         "display": "Pyruvate TMAO"
                     },{
+                        "display": "Ironredox",
+                        "ui_name": "Ironredox",
+                        "value": "Fe.O2",
+                        "id": "Fe.O2"
+                    },{
                         "id": "Pyr.SO4",
                         "value": "Pyr.SO4",
                         "ui_name": "Pyruvate sulfate",

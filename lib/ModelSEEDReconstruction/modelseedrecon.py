@@ -88,13 +88,22 @@ class ModelSEEDRecon(BaseModelingModule):
         params["genome_refs"] = self.process_genome_list(params["genome_refs"],params["workspace"])
         #Processing media
         params["gapfilling_media_objs"] = self.process_media_list(params["gapfilling_media_list"],default_media,params["workspace"])
-        #Preloading core and preselected template
+        #Preloading core and preselected template - note the default GS template is None because this signals for the classifier to be used to select the template
         self.gs_template = None
+        if params["gs_template_ref"] != None and not isinstance(params["gs_template_ref"],str):
+            #Allows user to directly set the GS template object by passing the object in gs_template_ref
+            self.gs_template = params["gs_template_ref"]
         if params["gs_template_ref"]:
+            #Allows user to set the workspace ID of the GS template to be used
             self.gs_template = self.get_template(params["gs_template_ref"],None)
-        if params["core_template_ref"]:
+        if params["core_template_ref"] != None and not isinstance(params["core_template_ref"],str):
+            #Allows user to directly set the core template object by passing the object in core_template_ref
+            self.core_template = params["core_template_ref"]
+        elif params["core_template_ref"]:
+            #Allows user to set the workspace ID of the core template to be used
             self.core_template = self.get_template(params["core_template_ref"],None)
         else:
+            #Setting the default core template
             self.core_template = self.get_template(self.templates["core"],None)  
         #Initializing classifier
         genome_classifier = self.get_classifier()
@@ -200,7 +209,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #if params["output_core_models"]:
             #TODO: Remove noncore reactions and change biomass and change model ID and then resave
             #Filling in model output
-            result_table = result_table.append(current_output, ignore_index = True)
+            result_table = pd.concat([result_table, pd.DataFrame([current_output])], ignore_index=True)
             mdllist.append(mdlutl)
         output = {}
         self.build_dataframe_report(result_table,mdllist)

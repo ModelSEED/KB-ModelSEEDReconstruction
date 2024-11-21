@@ -35,10 +35,10 @@ RUN pip install chemw==0.3.2
 RUN pip install deepdiff
 RUN pip install h5py
 
-RUN echo '31' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
-RUN echo '10' >/dev/null && pip install git+https://github.com/cshenry/cobrakbase.git@525409070d11fc1efd8fe5daf9069fd519d563c2
+RUN echo '32' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
+RUN echo '11' >/dev/null && pip install git+https://github.com/cshenry/cobrakbase.git@f0b3aa300fb153fc83b2fd5e83be231fc6992fae
 
-RUN echo '29' >/dev/null && mkdir deps && cd deps && \
+RUN echo '30' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
 RUN mkdir test
 
