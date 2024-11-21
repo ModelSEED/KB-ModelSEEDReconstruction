@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 sys.path.append("/deps/KBBaseModules/")
-sys.path.append("/deps/cobrakbase/cobrakbase/")
+sys.path.append("/deps/cobrakbase/")
 import json
 from os.path import exists
 from ModelSEEDReconstruction.modelseedrecon import ModelSEEDRecon
