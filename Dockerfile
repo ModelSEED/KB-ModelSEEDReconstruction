@@ -10,6 +10,7 @@ MAINTAINER chenry@anl.gov
 # https library that is out of date in the base image.
 
 RUN pip install --upgrade pip
+RUN pip install chemw==0.3.2
 
 # update security libraries in the base image
 RUN pip install cffi --upgrade \
@@ -31,7 +32,6 @@ RUN pip install --upgrade pip
 RUN pip install "numpy<1.24"
 RUN pip install cobra
 RUN pip install networkx
-RUN pip install chemw==0.3.2
 RUN pip install deepdiff
 RUN pip install h5py
 
