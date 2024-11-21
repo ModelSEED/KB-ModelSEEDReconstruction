@@ -40,7 +40,7 @@ RUN echo '35' >/dev/null && pip install --use-deprecated=legacy-resolver git+htt
 
 RUN echo '30' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
-RUN echo '1' >/dev/null && mkdir deps && cd deps && \
+RUN echo '1' >/dev/null && cd deps && \
 	git clone https://github.com/ModelSEED/ModelSEEDDatabase.git && \
     cd ModelSEEDDatabase && git checkout 2f5da32e26e3eed8181825ceebe1a45997204bcb
 RUN echo '1' >/dev/null && cd deps && \
