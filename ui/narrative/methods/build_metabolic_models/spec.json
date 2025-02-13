@@ -385,6 +385,19 @@
             "optional": true,
             "advanced": true
         },{
+            "id": "merge_annotations",
+            "field_type": "checkbox",
+            "default_values": [
+                "0"
+            ],
+            "checkbox_options": {
+                "unchecked_value": 0,
+                "checked_value": 1
+            },
+            "allow_multiple": false,
+            "optional": true,
+            "advanced": true
+        },{
             "id": "gs_template_ref",
             "field_type": "text",
             "default_values": [
@@ -410,6 +423,55 @@
                 ]
             },
             "allow_multiple": false,
+            "optional": true,
+            "advanced": true
+        },{
+            "id": "annotation_priority",
+            "field_type": "dropdown",
+            "default_values": [],
+            "dropdown_options": {
+                "options": [
+                    {
+                        "id": "RAST",
+                        "display": "RAST",
+                        "value": "RAST"
+                    },{
+                        "id": "DRAM",
+                        "display": "DRAM",
+                        "value": "DRAM"
+                    },{
+                        "id": "GLM4EC",
+                        "display": "GLM4EC",
+                        "value": "GLM4EC"
+                    },{
+                        "id": "PDB",
+                        "display": "PDB",
+                        "value": "PDB"
+                    },{
+                        "id": "PROKKA",
+                        "display": "PROKKA",
+                        "value": "PROKKA"
+                    },{
+                        "id": "SNEKMER",
+                        "display": "SNEKMER",
+                        "value": "SNEKMER"
+                    },{
+                        "id": "Import",
+                        "display": "Import",
+                        "value": "Import"
+                    },{
+                        "id": "Merge",
+                        "display": "Merge",
+                        "value": "Merge"
+                    },{
+                        "id": "All",
+                        "display": "All",
+                        "value": "All"
+                    }
+
+                ]
+            },
+            "allow_multiple": true,
             "optional": true,
             "advanced": true
         },{
@@ -519,6 +581,12 @@
                     "target_property": "core_template_ref",
                     "input_parameter": "core_template_ref",
                     "target_type_transform": "resolved-ref"
+                },{
+                    "target_property": "annotation_priority",
+                    "input_parameter": "annotation_priority"
+                },{
+                    "target_property": "merge_annotations",
+                    "input_parameter": "merge_annotations"
                 },{
                     "target_property": "gapfilling_mode",
                     "input_parameter": "gapfilling_mode"

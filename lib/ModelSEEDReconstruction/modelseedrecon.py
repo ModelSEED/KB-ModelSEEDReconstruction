@@ -81,7 +81,9 @@ class ModelSEEDRecon(BaseModelingModule):
             "extend_model_with_ontology":False,
             "ontology_events":None,
             "save_models_to_kbase":True,
-            "save_gapfilling_fba_to_kbase":True
+            "save_gapfilling_fba_to_kbase":True,
+            "annotation_priority":[],
+            "merge_annotations":False
         })
         if params["change_to_complete"]:
             default_media = "KBaseMedia/Complete"
@@ -162,8 +164,18 @@ class ModelSEEDRecon(BaseModelingModule):
             mdl.template_ref = str(self.gs_template.info)
             current_output["Core GF"] = "NA" 
             mdlutl = MSModelUtil.get(mdl)
-            if params["extend_model_with_ontology"]:
-                self.extend_model_with_other_ontologies(mdlutl,genome.anno_ont,builder,prioritized_event_list=params["ontology_events"])
+            if params["extend_model_with_ontology"] or len(params["annotation_priority"]) > 0:
+                #Removing reactions from model that are not in the core
+                remove_list = []
+                for rxn in mdl.reactions:
+                    if rxn.id not in self.core_template.reactions and rxn.id[0:3] != "bio":
+                        remove_list.append(rxn.id)
+                mdl.remove_reactions(remove_list)
+                #Now extending model with selected ontology priorities
+                if params["ontology_events"] == None and len(params["annotation_priority"]) > 0:
+                    params["ontology_events"] = genome.annoont.get_events_from_priority_list(params["annotation_priority"])
+                self.extend_model_with_other_ontologies(mdlutl,genome.annoont,builder,prioritized_event_list=params["ontology_events"],merge_all=params["merge_annotations"])
+            mdlutl.save_model("base_model.json")
             genome_objs = {mdlutl:genome}
             expression_objs = None
             if params["expression_refs"]:
