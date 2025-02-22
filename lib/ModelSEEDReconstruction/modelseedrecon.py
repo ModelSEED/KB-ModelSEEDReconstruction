@@ -167,10 +167,16 @@ class ModelSEEDRecon(BaseModelingModule):
             if params["extend_model_with_ontology"] or len(params["annotation_priority"]) > 0:
                 #Removing reactions from model that are not in the core
                 remove_list = []
-                for rxn in mdl.reactions:
-                    if rxn.id not in self.core_template.reactions and rxn.id[0:3] != "bio":
-                        remove_list.append(rxn.id)
-                mdl.remove_reactions(remove_list)
+                #Remove all non-core reactions IF RAST is not included in annotation priorities
+                if "RAST" not in params["annotation_priority"] and "all" not in params["annotation_priority"]:
+                    for rxn in mdl.reactions:
+                        if not mdlutl.is_core(rxn) and rxn.id[0:3] != "bio" and rxn.id[0:3] != "DM_" and rxn.id[0:3] != "EX_" and rxn.id[0:3] != "SK_":
+                            remove_list.append(rxn.id)
+                    print("Removing non-core reactions:",remove_list)
+                    mdl.remove_reactions(remove_list)
+                    print("Remaining reactions:")
+                    for item in mdl.reactions:
+                        print(item.id)
                 #Now extending model with selected ontology priorities
                 if params["ontology_events"] == None and len(params["annotation_priority"]) > 0:
                     params["ontology_events"] = genome.annoont.get_events_from_priority_list(params["annotation_priority"])
@@ -338,6 +344,7 @@ class ModelSEEDRecon(BaseModelingModule):
             #Computing tests for ATP safe gapfilling
             if params["atp_safe"]:
                 tests = mdlutl.get_atp_tests(core_template=self.core_template,atp_media_filename=self.module_dir+"/data/atp_medias.tsv",recompute=False)
+                print("Tests:",tests)
                 additional_tests.extend(tests)
             #Creating gapfilling object and configuring solver
             #mdlutl.model.solver = config["solver"]
@@ -409,7 +416,7 @@ class ModelSEEDRecon(BaseModelingModule):
             if params["save_gapfilling_fba_to_kbase"] and output_solution:
                 self.save_solution_as_fba(output_solution,mdlutl,output_solution_media,mdlutl.wsid+".fba",workspace=params["workspace"],fbamodel_ref=str(params["workspace"])+"/"+mdlutl.wsid)
             if not params["internal_call"]:
-                result_table = result_table.append(current_output, ignore_index = True) 
+                result_table = pd.concat([result_table, pd.DataFrame([current_output])], ignore_index=True)
         output = {}
         if not params["internal_call"]:
             self.build_dataframe_report(result_table,params["model_objs"])
