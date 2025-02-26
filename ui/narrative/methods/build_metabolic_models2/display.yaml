@@ -1,7 +1,7 @@
 #
 # Define basic display information
 #
-name     : MS2 - Build Prokaryotic Metabolic Models with OMEGGA
+name     : MS2 - Build Prokaryotic Metabolic Models
 
 tooltip  : |
     Using ModelSEED2 pipeline, construct draft metabolic models based on input annotated genomes.
@@ -94,36 +94,12 @@ parameters :
             Custom core template for reconstruction
         short-hint : |
             Models are generated based on a default template model in KBase. Template models capture the necessary biochemical information based on user-defined scope. KBase primarily uses three template models: (i) Gram positive microbe, (ii) Gram negative microbe, and(iii) Core pathways prokaryote. These template models differ from each other by biomass composition and biochemical reaction functional associations. The “automatic selection” option attempts to classify organisms as gram negative or gram positive based on specific functional roles (e.g. cell wall) linked to gram stain differentiation. Previous versions of templates are also available for reproducibility.This input enables users to specify their own custom core template for use in model reconstruction.
-
-    annotation_priority :
-        ui-name : |
-            Annotation priority
-        short-hint : |
-            Specify annotations to be used in model building in order of priority.
-
-    merge_annotations :
-        ui-name : |
-            Merge annotations
-        short-hint : |
-            Check this box if all annotation should be used regardless of priority.
     
     gapfilling_mode :
         ui-name : |
             Gapfilling type
         short-hint : |
-            Specifies the gapfilling approach: sequential means building up a solution as each new condition is gapfilled; independent means keeping every solution independent; global means gapfilling all conditions at once.
-
-    expression_refs :
-        ui-name : |
-            Expression datasets
-        short-hint : |
-            Feature value matrices to be used in OMEGGA method to aid in selecting gene candidates for gapfilled reactions
-
-    expression_conditions :
-        ui-name : |
-            Expression conditions
-        short-hint : |
-            Optional list of columns within the expression dataset to use with OMEGGA method. If no conditions are specified within an expression dataset, all the columnns will be used.
+            Specifies the gapfilling approach: sequential means building up a solution as each new condition is gapfilled; and independent means keeping every solution independent.
 
 icon: modelseed-teal.png
 

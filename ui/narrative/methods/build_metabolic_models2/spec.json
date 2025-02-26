@@ -385,19 +385,6 @@
             "optional": true,
             "advanced": true
         },{
-            "id": "merge_annotations",
-            "field_type": "checkbox",
-            "default_values": [
-                "0"
-            ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },{
             "id": "gs_template_ref",
             "field_type": "text",
             "default_values": [
@@ -426,63 +413,6 @@
             "optional": true,
             "advanced": true
         },{
-            "id": "annotation_priority",
-            "field_type": "dropdown",
-            "default_values": [],
-            "dropdown_options": {
-                "options": [
-                    {
-                        "id": "RAST",
-                        "display": "RAST",
-                        "value": "RAST"
-                    },{
-                        "id": "DRAM",
-                        "display": "DRAM",
-                        "value": "DRAM"
-                    },{
-                        "id": "GLM4EC",
-                        "display": "GLM4EC",
-                        "value": "GLM4EC"
-                    },{
-                        "id": "PDB",
-                        "display": "PDB",
-                        "value": "PDB"
-                    },{
-                        "id": "PROKKA",
-                        "display": "PROKKA",
-                        "value": "PROKKA"
-                    },{
-                        "id": "SNEKMER",
-                        "display": "SNEKMER",
-                        "value": "SNEKMER"
-                    },{
-                        "id": "KEGG",
-                        "display": "KEGG",
-                        "value": "KEGG"
-                    },{
-                        "id": "NetGO",
-                        "display": "NetGO",
-                        "value": "NetGO"
-                    },{
-                        "id": "Import",
-                        "display": "Import",
-                        "value": "Import"
-                    },{
-                        "id": "Merge",
-                        "display": "Merge",
-                        "value": "Merge"
-                    },{
-                        "id": "All",
-                        "display": "All",
-                        "value": "All"
-                    }
-
-                ]
-            },
-            "allow_multiple": true,
-            "optional": true,
-            "advanced": true
-        },{
             "id": "gapfilling_mode",
             "field_type": "dropdown",
             "default_values": [
@@ -498,43 +428,13 @@
                         "id": "Independent",
                         "display": "Independent",
                         "value": "Independent"
-                    },{
-                        "id": "Global",
-                        "display": "Global",
-                        "value": "Global"
                     }
                 ]
             },
             "allow_multiple": false,
             "optional": false,
             "advanced": true
-        },{
-         "text_options" : {
-            "valid_ws_types" : [
-               "KBaseFeatureValues.ExpressionMatrix"
-            ]
-         },
-         "default_values" : [
-            ""
-         ],
-         "id" : "expression_refs",
-         "advanced" : true,
-         "allow_multiple" : true,
-         "optional" : true,
-         "field_type" : "text"
-      },{
-         "default_values" : [
-            ""
-         ],
-         "advanced" : true,
-         "id" : "expression_conditions",
-         "field_type" : "text",
-         "allow_multiple" : true,
-         "optional" : true,
-         "text_options" : {
-            "valid_ws_types" : []
-         }
-      }
+        }
     ],
     "behavior": {
         "service-mapping": {
@@ -572,13 +472,6 @@
                     "target_property": "forced_atp_list",
                     "input_parameter": "forced_atp_list"
                 },{
-                    "target_property": "expression_refs",
-                    "input_parameter": "expression_refs",
-                    "target_type_transform": "resolved-ref"
-                },{
-                    "target_property": "expression_conditions",
-                    "input_parameter": "expression_conditions"
-                },{
                     "target_property": "gs_template",
                     "input_parameter": "gs_template"
                 },{
@@ -589,12 +482,6 @@
                     "target_property": "core_template_ref",
                     "input_parameter": "core_template_ref",
                     "target_type_transform": "resolved-ref"
-                },{
-                    "target_property": "annotation_priority",
-                    "input_parameter": "annotation_priority"
-                },{
-                    "target_property": "merge_annotations",
-                    "input_parameter": "merge_annotations"
                 },{
                     "target_property": "gapfilling_mode",
                     "input_parameter": "gapfilling_mode"

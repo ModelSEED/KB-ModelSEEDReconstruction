@@ -1,5 +1,5 @@
 {
-    "name": "build_metabolic_models",
+    "name": "gapfill_metabolic_models",
     "ver": "0.0.1",
     "authors": [
         "chenry"
@@ -16,14 +16,14 @@
     },
     "parameters": [
         {
-            "id": "genome_refs",
+            "id": "model_list",
             "field_type": "text",
             "default_values": [
                 ""
             ],
             "text_options": {
                 "valid_ws_types": [
-                    "KBaseGenomes.Genome","KBaseSearch.GenomeSet"
+                    "KBaseFBA.FBAModel"
                 ]
             },
             "allow_multiple": true,
@@ -33,13 +33,42 @@
             "id": "suffix",
             "field_type": "text",
             "default_values": [
-                ".mdl"
+                ".gf"
             ],
             "allow_multiple": false,
             "optional": false,
             "advanced": false
         },{
-            "id": "run_gapfilling",
+			 "id" : "source_models",
+			 "field_type" : "text",
+			 "default_values" : [
+				""
+			 ],
+			 "text_options" : {
+				"valid_ws_types" : [
+				   "KBaseFBA.FBAModel"
+				]
+			 },
+			 "allow_multiple" : true,
+			 "optional" : true,
+			 "advanced" : true
+		},{
+			"id" : "exclude_reactions",
+			"field_type" : "dynamic_dropdown",
+			"default_values" : [""],
+			"dynamic_dropdown_options" : {
+                "data_source": "custom",
+                "service_function": "BiochemistryAPI.search_reactions",
+                "service_version": "release",
+                "service_params": [{"query":"{{dynamic_dropdown_input}}"}],
+                "selection_id" : "id",
+                "description_template" : "<strong>{{id}}</strong>: {{name}}"
+            },
+			"allow_multiple" : true,
+			"optional" : true,
+			"advanced" : true
+		},{
+            "id": "atp_safe",
             "field_type": "checkbox",
             "default_values": [
                 "1"
@@ -50,9 +79,21 @@
             },
             "allow_multiple": false,
             "optional": false,
-            "advanced": false
+            "advanced": true
         },{
-            "id": "gapfilling_media_list",
+         "text_options" : {
+            "validate_as" : "float"
+         },
+         "field_type" : "text",
+         "allow_multiple" : false,
+         "optional" : false,
+         "advanced" : true,
+         "default_values" : [
+            "0.01"
+         ],
+         "id" : "minimum_objective"
+		},{
+            "id": "media_list",
             "field_type": "text",
             "default_values": [
                 ""
@@ -79,18 +120,17 @@
             "optional": false,
             "advanced": true
         },{
-            "id": "atp_safe",
-            "field_type": "checkbox",
-            "default_values": [
-                "1"
-            ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
-            },
-            "allow_multiple": false,
-            "optional": false,
-            "advanced": true
+			"id" : "default_objective",
+			"text_options" : {
+				"valid_ws_types" : []
+			},
+			"default_values" : [
+				"bio1"
+			],
+			"field_type" : "text",
+			"allow_multiple" : false,
+			"optional" : false,
+			"advanced" : false
         },{
             "id": "forced_atp_list",
             "field_type": "dropdown",
@@ -331,158 +371,6 @@
             "optional": true,
             "advanced": true
         },{
-            "id": "gs_template",
-            "field_type": "dropdown",
-            "default_values": [
-                "auto"
-            ],
-            "dropdown_options": {
-                "options": [
-                    {
-                        "id": "auto",
-                        "value": "auto",
-                        "display": "Automatic selection",
-                        "ui_name": "Automatic selection"
-                    },{
-                        "id": "old_gramneg",
-                        "value": "old_gramneg",
-                        "display": "Legacy gram negative",
-                        "ui_name": "Legacy gram negative"
-                    },{
-                        "id": "old_grampos",
-                        "value": "old_grampos",
-                        "display": "Legacy gram positive",
-                        "ui_name": "Legacy gram positive"
-                    },{
-                        "id": "gramneg",
-                        "value": "gramneg",
-                        "display": "Gram negative",
-                        "ui_name": "Gram negative"
-                    },{
-                        "id": "grampos",
-                        "value": "grampos",
-                        "display": "Gram positive",
-                        "ui_name": "Gram positive"
-                    },{
-                        "id": "archaea",
-                        "value": "archaea",
-                        "display": "Archaea",
-                        "ui_name": "Archaea"
-                    },{
-                        "id": "core",
-                        "value": "core",
-                        "display": "Core metabolism",
-                        "ui_name": "Core metabolism"
-                    },{
-                        "id": "custom",
-                        "value": "custom",
-                        "display": "Custom (select template)",
-                        "ui_name": "Custom (select template)"
-                    }
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },{
-            "id": "merge_annotations",
-            "field_type": "checkbox",
-            "default_values": [
-                "0"
-            ],
-            "checkbox_options": {
-                "unchecked_value": 0,
-                "checked_value": 1
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },{
-            "id": "gs_template_ref",
-            "field_type": "text",
-            "default_values": [
-                ""
-            ],
-            "text_options": {
-                "valid_ws_types": [
-                    "KBaseFBA.NewModelTemplate"
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },{
-            "id": "core_template_ref",
-            "field_type": "text",
-            "default_values": [
-                ""
-            ],
-            "text_options": {
-                "valid_ws_types": [
-                    "KBaseFBA.NewModelTemplate"
-                ]
-            },
-            "allow_multiple": false,
-            "optional": true,
-            "advanced": true
-        },{
-            "id": "annotation_priority",
-            "field_type": "dropdown",
-            "default_values": [],
-            "dropdown_options": {
-                "options": [
-                    {
-                        "id": "RAST",
-                        "display": "RAST",
-                        "value": "RAST"
-                    },{
-                        "id": "DRAM",
-                        "display": "DRAM",
-                        "value": "DRAM"
-                    },{
-                        "id": "GLM4EC",
-                        "display": "GLM4EC",
-                        "value": "GLM4EC"
-                    },{
-                        "id": "PDB",
-                        "display": "PDB",
-                        "value": "PDB"
-                    },{
-                        "id": "PROKKA",
-                        "display": "PROKKA",
-                        "value": "PROKKA"
-                    },{
-                        "id": "SNEKMER",
-                        "display": "SNEKMER",
-                        "value": "SNEKMER"
-                    },{
-                        "id": "KEGG",
-                        "display": "KEGG",
-                        "value": "KEGG"
-                    },{
-                        "id": "NetGO",
-                        "display": "NetGO",
-                        "value": "NetGO"
-                    },{
-                        "id": "Import",
-                        "display": "Import",
-                        "value": "Import"
-                    },{
-                        "id": "Merge",
-                        "display": "Merge",
-                        "value": "Merge"
-                    },{
-                        "id": "All",
-                        "display": "All",
-                        "value": "All"
-                    }
-
-                ]
-            },
-            "allow_multiple": true,
-            "optional": true,
-            "advanced": true
-        },{
             "id": "gapfilling_mode",
             "field_type": "dropdown",
             "default_values": [
@@ -498,103 +386,56 @@
                         "id": "Independent",
                         "display": "Independent",
                         "value": "Independent"
-                    },{
-                        "id": "Global",
-                        "display": "Global",
-                        "value": "Global"
                     }
                 ]
             },
             "allow_multiple": false,
             "optional": false,
             "advanced": true
-        },{
-         "text_options" : {
-            "valid_ws_types" : [
-               "KBaseFeatureValues.ExpressionMatrix"
-            ]
-         },
-         "default_values" : [
-            ""
-         ],
-         "id" : "expression_refs",
-         "advanced" : true,
-         "allow_multiple" : true,
-         "optional" : true,
-         "field_type" : "text"
-      },{
-         "default_values" : [
-            ""
-         ],
-         "advanced" : true,
-         "id" : "expression_conditions",
-         "field_type" : "text",
-         "allow_multiple" : true,
-         "optional" : true,
-         "text_options" : {
-            "valid_ws_types" : []
-         }
-      }
+        }
     ],
     "behavior": {
         "service-mapping": {
             "url": "",
             "name": "ModelSEEDReconstruction",
-            "method": "build_metabolic_models",
+            "method": "gapfill_metabolic_models",
             "input_mapping": [
                 {
                     "target_property": "workspace",
                     "narrative_system_variable": "workspace"
                 },{
-                    "target_property": "genome_refs",
-                    "input_parameter": "genome_refs",
+                    "target_property": "model_list",
+                    "input_parameter": "model_list",
                     "target_type_transform": "resolved-ref"
                 },{
-                    "target_property": "gapfilling_media_list",
-                    "input_parameter": "gapfilling_media_list",
+                    "target_property": "source_models",
+                    "input_parameter": "source_models",
                     "target_type_transform": "resolved-ref"
                 },{
-                    "target_property": "suffix",
-                    "input_parameter": "suffix"
-                },{
-                    "input_parameter": "run_gapfilling",
-                    "target_property": "run_gapfilling"
-                },{
-                    "target_property": "gapfilling_media_list",
-                    "input_parameter": "gapfilling_media_list"
-                },{
-                    "target_property": "atp_safe",
-                    "input_parameter": "atp_safe"
+                    "target_property": "media_list",
+                    "input_parameter": "media_list",
+                    "target_type_transform": "resolved-ref"
                 },{
                     "target_property": "change_to_complete",
                     "input_parameter": "change_to_complete"
                 },{
+                    "target_property": "suffix",
+                    "input_parameter": "suffix"
+                },{
+                    "input_parameter": "atp_safe",
+                    "target_property": "atp_safe"
+                },{
+                    "target_property": "minimum_objective",
+                    "input_parameter": "minimum_objective"
+                },{
+                    "target_property": "default_objective",
+                    "input_parameter": "default_objective"
+                },{
+                    "target_property": "reaction_exlusion_list",
+                    "input_parameter": "exclude_reactions"
+                },{
                     "target_property": "forced_atp_list",
                     "input_parameter": "forced_atp_list"
-                },{
-                    "target_property": "expression_refs",
-                    "input_parameter": "expression_refs",
-                    "target_type_transform": "resolved-ref"
-                },{
-                    "target_property": "expression_conditions",
-                    "input_parameter": "expression_conditions"
-                },{
-                    "target_property": "gs_template",
-                    "input_parameter": "gs_template"
-                },{
-                    "target_property": "gs_template_ref",
-                    "input_parameter": "gs_template_ref",
-                    "target_type_transform": "resolved-ref"
-                },{
-                    "target_property": "core_template_ref",
-                    "input_parameter": "core_template_ref",
-                    "target_type_transform": "resolved-ref"
-                },{
-                    "target_property": "annotation_priority",
-                    "input_parameter": "annotation_priority"
-                },{
-                    "target_property": "merge_annotations",
-                    "input_parameter": "merge_annotations"
                 },{
                     "target_property": "gapfilling_mode",
                     "input_parameter": "gapfilling_mode"
