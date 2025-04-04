@@ -172,11 +172,7 @@ class ModelSEEDRecon(BaseModelingModule):
                     for rxn in mdl.reactions:
                         if not mdlutl.is_core(rxn) and rxn.id[0:3] != "bio" and rxn.id[0:3] != "DM_" and rxn.id[0:3] != "EX_" and rxn.id[0:3] != "SK_":
                             remove_list.append(rxn.id)
-                    print("Removing non-core reactions:",remove_list)
                     mdl.remove_reactions(remove_list)
-                    print("Remaining reactions:")
-                    for item in mdl.reactions:
-                        print(item.id)
                 #Now extending model with selected ontology priorities
                 if params["ontology_events"] == None and len(params["annotation_priority"]) > 0:
                     params["ontology_events"] = genome.annoont.get_events_from_priority_list(params["annotation_priority"])
