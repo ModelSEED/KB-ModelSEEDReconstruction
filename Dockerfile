@@ -43,9 +43,9 @@ RUN echo '31' >/dev/null && mkdir deps && cd deps && \
 RUN echo '1' >/dev/null && cd deps && \
 	git clone https://github.com/ModelSEED/ModelSEEDDatabase.git && \
     cd ModelSEEDDatabase && git checkout 2f5da32e26e3eed8181825ceebe1a45997204bcb
-RUN echo '1' >/dev/null && cd deps && \
+RUN echo '2' >/dev/null && cd deps && \
     git clone https://github.com/cshenry/cobrakbase.git && \
-    cd cobrakbase && git checkout f0b3aa300fb153fc83b2fd5e83be231fc6992fae
+    cd cobrakbase && git checkout 68444e46fe3b68482da80798642461af2605e349
 RUN mkdir test
 
 # -----------------------------------------
