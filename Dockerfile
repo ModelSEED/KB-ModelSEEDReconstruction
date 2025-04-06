@@ -42,7 +42,7 @@ RUN echo '31' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
 RUN echo '1' >/dev/null && cd deps && \
 	git clone https://github.com/ModelSEED/ModelSEEDDatabase.git && \
-    cd ModelSEEDDatabase && git checkout 2f5da32e26e3eed8181825ceebe1a45997204bcb
+    cd ModelSEEDDatabase && git checkout 3346b71a34bc9d8c5a365b71d5a2959ffbe6c26e
 RUN echo '2' >/dev/null && cd deps && \
     git clone https://github.com/cshenry/cobrakbase.git && \
     cd cobrakbase && git checkout 68444e46fe3b68482da80798642461af2605e349
