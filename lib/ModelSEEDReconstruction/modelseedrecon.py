@@ -16,7 +16,7 @@ from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msgenome import normalize_role
 from kbbasemodules.basemodelingmodule import BaseModelingModule
-from modelseedpy.community.mscommunity import MSCommunity
+from mscommunity import MSCommunity
 
 logger = logging.getLogger(__name__)
 
@@ -481,10 +481,11 @@ class ModelSEEDRecon(BaseModelingModule):
         species_list = []
         abundance_hash = {}
         comm_model = MSCommunity(
-            model=mdlutl,
-            names=species_list
+            model=mdlutl.model,
+            ids=species_list
         )
         comm_model.set_abundance(abundance_hash)
+        #TODO:  This code will need to be updated
         mdlutl.pkgmgr.getpkg("CommKineticPkg").build_package(float(params["kinetics_coef"]), comm_model)
         output = {}
         #Optimizing and constraining objective to fraction of optimum
