@@ -237,7 +237,7 @@ class ModelSEEDRecon(BaseModelingModule):
     
     def gapfill_metabolic_models(self,params):
         default_media = "KBaseMedia/AuxoMedia"
-        self.initialize_call("gapfill_metabolic_models",params,True)
+        self.initialize_call("gapfill_metabolic_models",params,True,no_prov_params=["media_objs","model_objs","genome_objs","expression_objs","templates"])
         self.validate_args(params,["workspace"],{
             "media_list":None,
             "media_objs":None,
