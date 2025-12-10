@@ -52,6 +52,8 @@ RUN mkdir test
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work
+RUN mkdir -p /scratch/shared/data \
+ && ln -s /deps/ModelSEEDDatabase /scratch/shared/data/ModelSEEDDatabase
 RUN chmod -R a+rw /kb/module
 
 WORKDIR /kb/module
