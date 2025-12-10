@@ -36,7 +36,7 @@ RUN pip install networkx
 RUN pip install deepdiff
 RUN pip install h5py
 
-RUN echo '37' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
+RUN echo '38' >/dev/null && pip install --use-deprecated=legacy-resolver git+https://github.com/cshenry/ModelSEEDpy.git
 
 RUN echo '32' >/dev/null && mkdir deps && cd deps && \
 	git clone --branch main https://github.com/cshenry/KBBaseModules.git
