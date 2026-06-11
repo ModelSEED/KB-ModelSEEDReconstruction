@@ -16,6 +16,10 @@ from modelseedpy.core.msgenomeclassifier import MSGenomeClassifier
 from modelseedpy.core.mstemplate import MSTemplateBuilder
 from modelseedpy.core.msgenome import normalize_role
 from kbbasemodules.basemodelingmodule import BaseModelingModule
+<<<<<<< HEAD
+=======
+# from mscommunity import MSCommunity
+>>>>>>> 68eeb49 (update)
 
 logger = logging.getLogger(__name__)
 
